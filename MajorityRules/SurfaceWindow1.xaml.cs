@@ -99,5 +99,68 @@ namespace SurfaceApplication1
         {
             //TODO: disable audio, animations here
         }
+
+        // Declare the global variables.
+        TouchDevice ellipseControlTouchDevice;
+        Point lastPoint;
+
+        private void DragEllipse_TouchDown(object sender, TouchEventArgs e)
+        {
+            // Capture to the ellipse.  
+            e.TouchDevice.Capture(sender as Ellipse);
+
+            // Remember this contact if a contact has not been remembered already.  
+            // This contact is then used to move the ellipse around.
+            if (ellipseControlTouchDevice == null)
+            {
+                ellipseControlTouchDevice = e.TouchDevice;
+
+                // Remember where this contact took place.  
+                lastPoint = ellipseControlTouchDevice.GetTouchPoint(this.MainCanvas).Position;
+            }
+
+            // Mark this event as handled.  
+            e.Handled = true;
+        }
+
+        private void DragEllipse_TouchMove(object sender, TouchEventArgs e)
+        {
+            if (e.TouchDevice == ellipseControlTouchDevice)
+            {
+                // Get the current position of the contact.  
+                Point currentTouchPoint = ellipseControlTouchDevice.GetCenterPosition(this.MainCanvas);
+
+                // Get the change between the controlling contact point and
+                // the changed contact point.  
+                double deltaX = currentTouchPoint.X - lastPoint.X;
+                double deltaY = currentTouchPoint.Y - lastPoint.Y;
+
+                // Get and then set a new top position and a new left position for the ellipse.  
+                double newTop = Canvas.GetTop(sender as Ellipse) + deltaY;
+                double newLeft = Canvas.GetLeft(sender as Ellipse) + deltaX;
+
+                Canvas.SetTop(sender as Ellipse, newTop);
+                Canvas.SetLeft(sender as Ellipse, newLeft);
+
+                // Forget the old contact point, and remember the new contact point.  
+                lastPoint = currentTouchPoint;
+
+                // Mark this event as handled.  
+                e.Handled = true;
+            }
+        }
+
+        private void DragEllipse_TouchLeave(object sender, TouchEventArgs e)
+        {
+            // If this contact is the one that was remembered  
+            if (e.TouchDevice == ellipseControlTouchDevice)
+            {
+                // Forget about this contact.
+                ellipseControlTouchDevice = null;
+            }
+
+            // Mark this event as handled.  
+            e.Handled = true;
+        }
     }
 }
