@@ -23,6 +23,10 @@ namespace SurfaceApplication1
     /// </summary>
     public partial class SurfaceWindow1 : SurfaceWindow
     {
+
+        public int Test { get; set; }
+
+
         /// <summary>
         /// Default constructor.
         /// </summary>
@@ -30,8 +34,11 @@ namespace SurfaceApplication1
         {
             InitializeComponent();
 
+            
             // Add handlers for window availability events
             AddWindowAvailabilityHandlers();
+
+            CanvasController rthttr = new CanvasController(MainCanvas);
         }
 
         /// <summary>

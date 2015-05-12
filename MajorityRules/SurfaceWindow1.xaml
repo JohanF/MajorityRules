@@ -3,32 +3,12 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:s="http://schemas.microsoft.com/surface/2008"
     Title="SurfaceApplication1" mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" d:DesignHeight="309" d:DesignWidth="662" SizeToContent="WidthAndHeight">
-    <Canvas Name="MainCanvas">
+    <Canvas Name="MainCanvas" Height="600" Width="800" Background="White">
         <!-- 
         The ellipse that will be dragged around. 
         The Top and Left attributes must be set 
         or Canvas.GetTop and Canvas.GetLeft will return NaN. 
         -->
-        <Ellipse 
-            Name="DragEllipse" 
-            Canvas.Top="126" Canvas.Left="145" 
-            Fill="{DynamicResource {x:Static s:SurfaceColors.Accent4BrushKey}}" 
-            Width="100" Height="100" 
-            TouchDown="DragEllipse_TouchDown"
-            TouchMove="DragEllipse_TouchMove"
-            TouchLeave="DragEllipse_TouchLeave"
-            >
-        </Ellipse>
-        <Ellipse 
-            Name="DragEllipse2" 
-            Canvas.Top="67" Canvas.Left="409" 
-            Fill="{DynamicResource {x:Static s:SurfaceColors.Accent4BrushKey}}" 
-            Width="100" Height="100" 
-            TouchDown="DragEllipse_TouchDown"
-            TouchMove="DragEllipse_TouchMove"
-            TouchLeave="DragEllipse_TouchLeave"
-            >
-        </Ellipse>
-
+       
     </Canvas>
 </s:SurfaceWindow>
