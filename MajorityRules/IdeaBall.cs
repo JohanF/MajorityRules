@@ -7,19 +7,19 @@ using System.Windows.Controls;
 using Microsoft.Surface.Presentation;
 using System.Windows.Media;
 using System.Windows;
+using System.Diagnostics;
 
 namespace SurfaceApplication1
 {
     class IdeaBall
     {
-        const float Friction = 0.6f;
-        const int InitRadius = 10;
+        private const float Friction = 0.6f;
+        private const int InitRadius = 10;
+        private const double Restitution = 1;
+        private static Vector adjustment = new Vector(0.0001, 0.0001);
 
-        public int X { get; set; }
-        public int Y { get; set; }
-
-        public float Vx { get; set; }
-        public float Vy { get; set; }
+        public Vector Position { get; set; }
+        public Vector Velocity { get; set; }
 
         private int _radius;
         public int Radius
@@ -35,18 +35,15 @@ namespace SurfaceApplication1
 
 
 
-        public IdeaBall(int speed)
+        public IdeaBall(Vector Position, Vector Velocity)
         {
             SolidColorBrush fill = new SolidColorBrush()
             {
                 Color = Colors.Green
             };
 
-
-
-
-            Vx = speed;
-            Vy = speed;
+            this.Velocity = Velocity;
+            this.Position = Position;
 
             Ellipse = new Ellipse()
             {
@@ -68,23 +65,87 @@ namespace SurfaceApplication1
 
         public void Draw()
         {
-            Canvas.SetLeft(Ellipse, X - Radius);
-            Canvas.SetTop(Ellipse, Y - Radius);
+            Canvas.SetLeft(Ellipse, this.Position.X - Radius);
+            Canvas.SetTop(Ellipse, this.Position.Y - Radius);
         }
 
-        public bool intersects(IdeaBall ball)
+        public static bool Intersects(IdeaBall a, IdeaBall b)
         {
-            return (X + Radius + ball.Radius > ball.X
-                    && X < ball.X + Radius + ball.Radius
-                    && Y + Radius + ball.Radius > ball.Y
-                    && Y < ball.Y + Radius + ball.Radius);
+            return (a.Position.X + a.Radius + b.Radius > b.Position.X
+                    && a.Position.X < b.Position.X + a.Radius + b.Radius
+                    && a.Position.Y + a.Radius + b.Radius > b.Position.Y
+                    && a.Position.Y < b.Position.Y + a.Radius + b.Radius);
         }
 
-        private static float DistanceTo(IdeaBall a, IdeaBall b)
+        private static bool Collides(IdeaBall a, IdeaBall b)
         {
-            float distance = (float)Math.Sqrt(((a.X - b.X) * (a.X - b.X)) + ((a.Y - b.Y) * (a.Y - b.Y)));
-            if (distance < 0) { distance = distance * -1; }
-            return distance;
+            double dX = a.Position.X - b.Position.X;
+            double dY = a.Position.Y - b.Position.Y;
+
+            double sumRadius = a.Radius + b.Radius;
+            double sqrRadius = sumRadius * sumRadius;
+
+            double distSqr = (dX * dX) + (dY * dY);
+
+            if (distSqr <= sqrRadius)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public void ResolveCollision(IdeaBall a, IdeaBall b)
+        {
+            // get the mtd
+            //Vector deltaPosition = new Vector(a.Position.X - b.Position.X, a.Position.Y - b.Position.Y-0.00001);
+            Vector deltaPosition = a.Position - b.Position;
+
+            double deltaLength = deltaPosition.Length;
+
+            if ((a.Radius + b.Radius) - deltaLength == 0)
+            {
+                return;
+            }
+            // minimum translation distance to push balls apart after intersecting
+            Vector mtd = deltaPosition * (((a.Radius + b.Radius) - deltaLength) / deltaLength);
+
+
+
+            // resolve intersection --
+            // inverse mass quantities
+            double im1 = 1.0 / a.Radius;
+            double im2 = 1.0 / b.Radius;
+
+            // push-pull them apart based off their mass
+            a.Position = a.Position + (mtd * (im1 / (im1 + im2))) + adjustment;
+            b.Position = b.Position - (mtd * (im2 / (im1 + im2))) - adjustment;
+
+
+     
+
+            // impact speed
+            Vector v = a.Velocity-b.Velocity;
+            Vector mtdNormalized = new Vector(mtd.X, mtd.Y);
+            mtdNormalized.Normalize();
+            double vn = v*mtdNormalized;
+
+            // sphere intersecting but moving away from each other already
+            if (vn > 0.0f) return;
+
+            // collision impulse
+            double i = (-(1.0 + Restitution) * vn) / (im1 + im2);
+            Vector impulse = mtdNormalized * (i);
+
+            Vector aNewVelocity = a.Velocity + (impulse * (im1));
+            Vector bNewVelocity = b.Velocity - (impulse * (im2));
+
+
+
+            // change in momentum
+            a.Velocity = aNewVelocity;
+            b.Velocity = bNewVelocity;
+
         }
 
         internal void DetectCollisions(List<IdeaBall> items)
@@ -97,19 +158,18 @@ namespace SurfaceApplication1
             {
                 if (!this.Equals(ball))
                 {
-                    float distance = IdeaBall.DistanceTo(this, ball);
-                    if (this.intersects(ball) && (distance < Radius + ball.Radius))
+                    if (Intersects(this, ball) && Collides(this, ball))
                     {
                         this.Ellipse.Fill = new SolidColorBrush()
                         {
                             Color = Colors.Red
                         };
-                        CalculateNewVelocities(this, ball, distance);
+                        ResolveCollision(this, ball);
                     };
                 }
             }
         }
-
+        /*
 	    public static Vector VectorNewPlane(Vector velocity, double rotation) {
 		    //alfa = the x-vectors angle towards the new plane
 		    //beta = the y-vectors angle towards the new plane
@@ -123,12 +183,13 @@ namespace SurfaceApplication1
 		    return newVelocity;
 	    }
 
+        /*
         public static void HandleCollision(Vector v1, Vector v2, double weight1, double weight2)
         {
 		    /*
 		     * v1 = ( (m1 - m2)*u1 + 2*m2*u2 ) / (m1 + m2)
 		     * v2 = ( (m2 - m1)*u2 + 2*m1*u1 ) / (m1 + m2)
-                     */
+                     
             double momentum = v1.X * weight1 + v2.X * weight2;
             double kinetic = v1.X * v1.X * weight1 / 2 + v2.X * v2.X * weight2 / 2;
             Vector tmp = new Vector();
@@ -138,7 +199,8 @@ namespace SurfaceApplication1
         
 		
 	    }
-
+        */
+        /*
         private static void CalculateNewVelocities(IdeaBall a, IdeaBall b, float distance)
         {
             Vector vecA = new Vector(a.X, a.Y);
@@ -207,7 +269,7 @@ namespace SurfaceApplication1
             a.X = a.X + Convert.ToInt16(newVelX1);
             a.Y = a.Y + Convert.ToInt16(newVelY1);
             b.X = b.X + Convert.ToInt16(newVelX2);
-            b.Y = b.Y + Convert.ToInt16(newVelY2);*/
-        }
+            b.Y = b.Y + Convert.ToInt16(newVelY2);
+        }*/
     }
 }
