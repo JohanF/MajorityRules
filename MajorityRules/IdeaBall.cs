@@ -16,7 +16,7 @@ namespace SurfaceApplication1
     class IdeaBall
     {
         private const float Friction = 0.6f;
-        private const int InitRadius = 10;
+        private const int InitRadius = 25;
         private const double Restitution = 1;
         private static Vector adjustment = new Vector(0.0001, 0.0001);
         private TouchDevice ellipseControlTouchDevice;
@@ -231,9 +231,9 @@ namespace SurfaceApplication1
                 {
                     if (Intersects(this, ball) && Collides(this, ball))
                     {
-                        this.Ellipse.Fill = new SolidColorBrush()
+                        //this.Ellipse.Fill = new SolidColorBrush()
                         {
-                            Color = Colors.Red
+                            //Color = Colors.Red
                         };
                         ResolveCollision(this, ball);
                     };

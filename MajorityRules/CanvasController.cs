@@ -27,7 +27,7 @@ namespace SurfaceApplication1
         private Stopwatch stopWatch = new Stopwatch();
         private int lastTime;
         private int deltaTime;
-        private double gravity = 3;
+        private double gravity = 1.5;
 
         public CanvasController(Canvas MainCanvas)
         {
@@ -36,7 +36,7 @@ namespace SurfaceApplication1
             // TODO: Complete member initialization
             this._mainCanvas = MainCanvas;
 
-            for (int i = 0; i < 200; i++)
+            for (int i = 0; i < 40; i++)
             {
                 items.Add(new IdeaBall(new Vector(random.Next(0, 800), random.Next(0, 600)), new Vector(random.Next(2, 5), random.Next(2, 5)), this._mainCanvas));
             }
