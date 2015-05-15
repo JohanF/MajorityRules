@@ -8,6 +8,8 @@ using Microsoft.Surface.Presentation;
 using System.Windows.Media;
 using System.Windows;
 using System.Diagnostics;
+using Microsoft.Surface.Presentation.Input;
+using System.Windows.Input;
 
 namespace SurfaceApplication1
 {
@@ -17,6 +19,9 @@ namespace SurfaceApplication1
         private const int InitRadius = 10;
         private const double Restitution = 1;
         private static Vector adjustment = new Vector(0.0001, 0.0001);
+        private TouchDevice ellipseControlTouchDevice;
+        private Canvas mainCanvas;
+        private Point lastPoint;
 
         public Vector Position { get; set; }
         public Vector Velocity { get; set; }
@@ -35,7 +40,7 @@ namespace SurfaceApplication1
 
 
 
-        public IdeaBall(Vector Position, Vector Velocity)
+        public IdeaBall(Vector Position, Vector Velocity, Canvas mainCanvas)
         {
             SolidColorBrush fill = new SolidColorBrush()
             {
@@ -50,6 +55,72 @@ namespace SurfaceApplication1
                 Fill = fill,
             };
             Radius = InitRadius;
+            Ellipse.TouchDown += new System.EventHandler<System.Windows.Input.TouchEventArgs>(Ellipse_TouchDown);
+            Ellipse.TouchMove += new System.EventHandler<System.Windows.Input.TouchEventArgs>(Ellipse_TouchMove);
+            Ellipse.TouchLeave += new System.EventHandler<System.Windows.Input.TouchEventArgs>(Ellipse_TouchLeave);
+        }
+
+        void Ellipse_TouchLeave(object sender, System.Windows.Input.TouchEventArgs e)
+        {
+            // If this contact is the one that was remembered  
+            if (e.TouchDevice == ellipseControlTouchDevice)
+            {
+                // Forget about this contact.
+                ellipseControlTouchDevice = null;
+            }
+
+            // Mark this event as handled.  
+            e.Handled = true;
+        }
+
+        void Ellipse_TouchMove(object sender, System.Windows.Input.TouchEventArgs e)
+        {
+
+            if (e.TouchDevice == ellipseControlTouchDevice)
+            {
+                // Get the current position of the contact.  
+                Point currentTouchPoint = ellipseControlTouchDevice.GetCenterPosition(this.mainCanvas);
+
+                // Get the change between the controlling contact point and
+                // the changed contact point.  
+                double deltaX = currentTouchPoint.X - lastPoint.X;
+                double deltaY = currentTouchPoint.Y - lastPoint.Y;
+
+                // Get and then set a new top position and a new left position for the ellipse. 
+                this.Position = new Vector(this.Position.X + (int)deltaX, this.Position.Y + (int)deltaY);
+                this.Velocity = new Vector(deltaX, deltaY);
+
+                // Forget the old contact point, and remember the new contact point.  
+                lastPoint = currentTouchPoint;
+
+                // Mark this event as handled.  
+                e.Handled = true;
+            }
+        }
+
+        void Ellipse_TouchDown(object sender, System.Windows.Input.TouchEventArgs e)
+        {
+            /*
+            this.Vx = 0;
+            this.Vy = 0;
+            */
+
+            // Capture to the ellipse.  
+            e.TouchDevice.Capture(sender as Ellipse);
+
+            // Remember this contact if a contact has not been remembered already.  
+            // This contact is then used to move the ellipse around.
+            if (ellipseControlTouchDevice == null)
+            {
+                ellipseControlTouchDevice = e.TouchDevice;
+
+                // Remember where this contact took place.  
+                lastPoint = ellipseControlTouchDevice.GetTouchPoint(this.mainCanvas).Position;
+            }
+
+            // Mark this event as handled.  
+            e.Handled = true;
+
         }
 
 
@@ -143,8 +214,8 @@ namespace SurfaceApplication1
 
 
             // change in momentum
-            a.Velocity = aNewVelocity;
-            b.Velocity = bNewVelocity;
+            a.Velocity = aNewVelocity * 0.58;
+            b.Velocity = bNewVelocity * 0.58;
 
         }
 
@@ -271,5 +342,6 @@ namespace SurfaceApplication1
             b.X = b.X + Convert.ToInt16(newVelX2);
             b.Y = b.Y + Convert.ToInt16(newVelY2);
         }*/
+        
     }
 }

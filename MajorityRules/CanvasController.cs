@@ -27,6 +27,7 @@ namespace SurfaceApplication1
         private Stopwatch stopWatch = new Stopwatch();
         private int lastTime;
         private int deltaTime;
+        private double gravity = 3;
 
         public CanvasController(Canvas MainCanvas)
         {
@@ -37,7 +38,7 @@ namespace SurfaceApplication1
 
             for (int i = 0; i < 200; i++)
             {
-                items.Add(new IdeaBall(new Vector(random.Next(0, 800), random.Next(0, 600)), new Vector(random.Next(2, 5), random.Next(2, 5))));
+                items.Add(new IdeaBall(new Vector(random.Next(0, 800), random.Next(0, 600)), new Vector(random.Next(2, 5), random.Next(2, 5)), this._mainCanvas));
             }
             //items.Add(new IdeaBall(new Vector(100, 100), new Vector(5.1, 5)));
             //items.Add(new IdeaBall(new Vector(500, 500), new Vector(-5, -5)));
@@ -84,6 +85,9 @@ namespace SurfaceApplication1
 
                 ball.Position += ball.Velocity;
 
+
+                ball.Velocity = ball.Velocity * 0.88 + calcGravity(ball.Position.X, ball.Position.Y);
+
                 if (ball.Position.X >= _viewportWidthMax - ball.Radius && ball.Velocity.X > 0) ball.Velocity = new Vector(-ball.Velocity.X, ball.Velocity.Y);
                 if (ball.Position.X <= _viewportWidthMin + ball.Radius && ball.Velocity.X < 0) ball.Velocity = new Vector(-ball.Velocity.X, ball.Velocity.Y);
                 if (ball.Position.Y >= _viewportHeightMax - ball.Radius && ball.Velocity.Y > 0) ball.Velocity = new Vector(ball.Velocity.X, -ball.Velocity.Y);
@@ -108,7 +112,28 @@ namespace SurfaceApplication1
         }
 
 
+        private Vector calcGravity(double vX, double vY)
+        {
+            Vector centerOfGravity = new Vector();
+            centerOfGravity.X = 300;
+            centerOfGravity.Y = 300;
 
+            double deltaY = vY - centerOfGravity.Y;
+            double deltaX = vX - centerOfGravity.X;
+
+            double angleInDegrees = Math.Atan2(deltaY, deltaX) * 180 / Math.PI;
+
+            //b.Text = System.Convert.ToString("Cos = " + Math.Cos(angleInDegrees) + "Sin = " + Math.Sin(angleInDegrees));
+
+            Vector newGravVelocity = new Vector();
+
+            newGravVelocity.X = gravity * (Math.Cos(angleInDegrees));
+            newGravVelocity.Y = gravity * (Math.Sin(angleInDegrees));
+
+
+            return newGravVelocity;
+
+        }
 
 
     }
