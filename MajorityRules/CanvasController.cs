@@ -9,6 +9,7 @@ using System.Threading;
 using System.Windows.Media;
 using System.Diagnostics;
 using System.Windows;
+using System.Windows.Shapes;
 
 
 
@@ -18,9 +19,9 @@ namespace SurfaceApplication1
     {
         private Canvas _mainCanvas;
         private List<IdeaBall> items = new List<IdeaBall>();
-        private int _viewportWidthMax = 600;
+        private int _viewportWidthMax = 1920;
         private int _viewportWidthMin = 0;
-        private int _viewportHeightMax = 600;
+        private int _viewportHeightMax = 1080;
         private int _viewportHeightMin = 0;
         private const int Fps = 60;
         private Random random = new Random();
@@ -28,17 +29,61 @@ namespace SurfaceApplication1
         private int lastTime;
         private int deltaTime;
         private double gravity = 1.5;
+        private double rotation = 0;
+        private Point centerOfGravity;
+        private Point centerOfRotation;
+        private double theta;
+        private Ellipse eli;
+        private const int InitRadius = 25;  
+        private int rotationDampening = 15;
+
+        private int _radius;
+        private int Radius
+        {
+            get { return _radius; }
+            set
+            {
+                _radius = value;
+                eli.Width = value * 2;
+                eli.Height = value * 2;
+            }
+        }
 
         public CanvasController(Canvas MainCanvas)
         {
+            /*
+            SolidColorBrush fill = new SolidColorBrush()
+            {
+                Color = Colors.Blue
+            };
+
+            eli = new Ellipse()
+            {
+                Fill = fill,
+            };
+
+            
+            Radius = InitRadius;
+             */
+
             stopWatch.Start();
             lastTime = stopWatch.Elapsed.Milliseconds;
             // TODO: Complete member initialization
             this._mainCanvas = MainCanvas;
+            this.centerOfGravity = new Point();
+            this.centerOfRotation = new Point();
+
+            centerOfGravity.X = 1920/2;
+            centerOfGravity.Y = 1080/2;
+
+            centerOfRotation.X = 1920/2;
+            centerOfRotation.Y = 1080/2 + 100;
+
+            theta = 180 / Math.PI;
 
             for (int i = 0; i < 40; i++)
             {
-                items.Add(new IdeaBall(new Vector(random.Next(0, 800), random.Next(0, 600)), new Vector(random.Next(2, 5), random.Next(2, 5)), this._mainCanvas));
+                items.Add(new IdeaBall(new Vector(random.Next(0, 800), random.Next(0, 600)), new Vector(random.Next(2, 5), random.Next(2, 5)), this._mainCanvas, random.Next(2, 5)*10));
             }
             //items.Add(new IdeaBall(new Vector(100, 100), new Vector(5.1, 5)));
             //items.Add(new IdeaBall(new Vector(500, 500), new Vector(-5, -5)));
@@ -50,6 +95,8 @@ namespace SurfaceApplication1
             {
                 MainCanvas.Children.Add(ball.Ellipse);
             }
+
+            //MainCanvas.Children.Add(this.eli);
 
             DispatcherTimer timer = new DispatcherTimer();
             //System.Timers.Timer timer = new System.Timers.Timer();
@@ -71,6 +118,10 @@ namespace SurfaceApplication1
 
             lastTime = currentTime;
             Random randomGenerator = new Random();
+
+            //Canvas.SetLeft(eli, centerOfRotation.X);
+            //Canvas.SetTop(eli, centerOfRotation.Y);
+
             foreach (IdeaBall ball in items){
 
                 ball.Velocity *= 0.99;
@@ -84,10 +135,19 @@ namespace SurfaceApplication1
                 }
 
                 ball.Position += ball.Velocity;
+                if (rotationDampening <= 1)
+                {
+                    centerOfRotation = RotatePoint(centerOfRotation, centerOfGravity, 1);
+                    rotationDampening = 15;
+                }
+                else
+                {
+                    rotationDampening--;
+                }
 
 
-                ball.Velocity = ball.Velocity * 0.88 + calcGravity(ball.Position.X, ball.Position.Y);
-
+                ball.Velocity = ball.Velocity * 0.68;
+                if (!ball.IsTouched) ball.Velocity = ball.Velocity + calcGravity(ball.Position.X, ball.Position.Y, centerOfGravity, gravity) + calcGravity(ball.Position.X, ball.Position.Y, centerOfRotation, rotation);
                 if (ball.Position.X >= _viewportWidthMax - ball.Radius && ball.Velocity.X > 0) ball.Velocity = new Vector(-ball.Velocity.X, ball.Velocity.Y);
                 if (ball.Position.X <= _viewportWidthMin + ball.Radius && ball.Velocity.X < 0) ball.Velocity = new Vector(-ball.Velocity.X, ball.Velocity.Y);
                 if (ball.Position.Y >= _viewportHeightMax - ball.Radius && ball.Velocity.Y > 0) ball.Velocity = new Vector(ball.Velocity.X, -ball.Velocity.Y);
@@ -112,28 +172,46 @@ namespace SurfaceApplication1
         }
 
 
-        private Vector calcGravity(double vX, double vY)
+        private Vector calcGravity(double vX, double vY, Point attractor, double G)
         {
-            Vector centerOfGravity = new Vector();
-            centerOfGravity.X = 300;
-            centerOfGravity.Y = 300;
 
-            double deltaY = vY - centerOfGravity.Y;
-            double deltaX = vX - centerOfGravity.X;
-
-            double angleInDegrees = Math.Atan2(deltaY, deltaX) * 180 / Math.PI;
-
-            //b.Text = System.Convert.ToString("Cos = " + Math.Cos(angleInDegrees) + "Sin = " + Math.Sin(angleInDegrees));
+            double dY = vY - attractor.Y;
+            double dX = vX - attractor.X;
 
             Vector newGravVelocity = new Vector();
 
-            newGravVelocity.X = gravity * (Math.Cos(angleInDegrees));
-            newGravVelocity.Y = gravity * (Math.Sin(angleInDegrees));
+            if (Math.Abs(dY) < 2 && Math.Abs(dX) < 2) return newGravVelocity;
+
+            double angleInDegrees = Math.Atan2(dY, dX) * 180 / Math.PI;
+
+            //b.Text = System.Convert.ToString("Cos = " + Math.Cos(angleInDegrees) + "Sin = " + Math.Sin(angleInDegrees));
+
+
+            newGravVelocity.X = G * (Math.Cos(angleInDegrees));
+            newGravVelocity.Y = G * (Math.Sin(angleInDegrees));
 
 
             return newGravVelocity;
 
         }
+
+        static Point RotatePoint(Point pointToRotate, Point centerPoint, double angleInDegrees)
+                        {
+                        double angleInRadians = angleInDegrees * (Math.PI / 180);
+                        double cosTheta = Math.Cos(angleInRadians);
+                        double sinTheta = Math.Sin(angleInRadians);
+                        return new Point
+                                 {
+                        X =
+                        (int)
+                        (cosTheta * (pointToRotate.X - centerPoint.X) -
+                        sinTheta * (pointToRotate.Y - centerPoint.Y) + centerPoint.X),
+                        Y =
+                        (int)
+                        (sinTheta * (pointToRotate.X - centerPoint.X) +
+                        cosTheta * (pointToRotate.Y - centerPoint.Y) + centerPoint.Y)
+                        };
+}
 
 
     }

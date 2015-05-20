@@ -22,9 +22,12 @@ namespace SurfaceApplication1
         private TouchDevice ellipseControlTouchDevice;
         private Canvas mainCanvas;
         private Point lastPoint;
+        private double deltaX;
+        private double deltaY;
 
         public Vector Position { get; set; }
         public Vector Velocity { get; set; }
+        public bool IsTouched { get; set; }
 
         private int _radius;
         public int Radius
@@ -40,7 +43,7 @@ namespace SurfaceApplication1
 
 
 
-        public IdeaBall(Vector Position, Vector Velocity, Canvas mainCanvas)
+        public IdeaBall(Vector Position, Vector Velocity, Canvas mainCanvas, int rad)
         {
             SolidColorBrush fill = new SolidColorBrush()
             {
@@ -49,12 +52,14 @@ namespace SurfaceApplication1
 
             this.Velocity = Velocity;
             this.Position = Position;
+            this.mainCanvas = mainCanvas;
+            this.IsTouched = false;
 
             Ellipse = new Ellipse()
             {
                 Fill = fill,
             };
-            Radius = InitRadius;
+            Radius = rad;
             Ellipse.TouchDown += new System.EventHandler<System.Windows.Input.TouchEventArgs>(Ellipse_TouchDown);
             Ellipse.TouchMove += new System.EventHandler<System.Windows.Input.TouchEventArgs>(Ellipse_TouchMove);
             Ellipse.TouchLeave += new System.EventHandler<System.Windows.Input.TouchEventArgs>(Ellipse_TouchLeave);
@@ -67,6 +72,8 @@ namespace SurfaceApplication1
             {
                 // Forget about this contact.
                 ellipseControlTouchDevice = null;
+                this.Velocity = new Vector(deltaX+3, deltaY+3);
+                this.IsTouched = false;
             }
 
             // Mark this event as handled.  
@@ -80,15 +87,14 @@ namespace SurfaceApplication1
             {
                 // Get the current position of the contact.  
                 Point currentTouchPoint = ellipseControlTouchDevice.GetCenterPosition(this.mainCanvas);
-
+                    
                 // Get the change between the controlling contact point and
                 // the changed contact point.  
-                double deltaX = currentTouchPoint.X - lastPoint.X;
-                double deltaY = currentTouchPoint.Y - lastPoint.Y;
+                deltaX = currentTouchPoint.X - lastPoint.X;
+                deltaY = currentTouchPoint.Y - lastPoint.Y;
 
                 // Get and then set a new top position and a new left position for the ellipse. 
                 this.Position = new Vector(this.Position.X + (int)deltaX, this.Position.Y + (int)deltaY);
-                this.Velocity = new Vector(deltaX, deltaY);
 
                 // Forget the old contact point, and remember the new contact point.  
                 lastPoint = currentTouchPoint;
@@ -107,6 +113,8 @@ namespace SurfaceApplication1
 
             // Capture to the ellipse.  
             e.TouchDevice.Capture(sender as Ellipse);
+
+            this.IsTouched = true;
 
             // Remember this contact if a contact has not been remembered already.  
             // This contact is then used to move the ellipse around.
@@ -170,53 +178,57 @@ namespace SurfaceApplication1
         {
             // get the mtd
             //Vector deltaPosition = new Vector(a.Position.X - b.Position.X, a.Position.Y - b.Position.Y-0.00001);
-            Vector deltaPosition = a.Position - b.Position;
+            
 
-            double deltaLength = deltaPosition.Length;
+                Vector deltaPosition = a.Position - b.Position;
 
-            if ((a.Radius + b.Radius) - deltaLength == 0)
-            {
-                return;
+                double deltaLength = deltaPosition.Length;
+
+                if ((a.Radius + b.Radius) - deltaLength == 0)
+                {
+                    return;
+                }
+                // minimum translation distance to push balls apart after intersecting
+                Vector mtd = deltaPosition * (((a.Radius + b.Radius) - deltaLength) / deltaLength);
+
+
+
+                // resolve intersection --
+                // inverse mass quantities
+                double im1 = 1.0 / a.Radius;
+                double im2 = 1.0 / b.Radius;
+
+                // push-pull them apart based off their mass
+                a.Position = a.Position + (mtd * (im1 / (im1 + im2))) + adjustment;
+                b.Position = b.Position - (mtd * (im2 / (im1 + im2))) - adjustment;
+
+
+
+
+                // impact speed
+                Vector v = a.Velocity - b.Velocity;
+                Vector mtdNormalized = new Vector(mtd.X, mtd.Y);
+                mtdNormalized.Normalize();
+                double vn = v * mtdNormalized;
+
+                // sphere intersecting but moving away from each other already
+                if (vn > 0.0f) return;
+
+                // collision impulse
+                if (vn < -10.0f)
+                {
+                double i = (-(1.0 + Restitution) * vn) / (im1 + im2);
+                Vector impulse = mtdNormalized * (i);
+
+                Vector aNewVelocity = a.Velocity + (impulse * (im1));
+                Vector bNewVelocity = b.Velocity - (impulse * (im2));
+
+
+
+                // change in momentum
+                a.Velocity = aNewVelocity * 0.75;
+                b.Velocity = bNewVelocity * 0.75;
             }
-            // minimum translation distance to push balls apart after intersecting
-            Vector mtd = deltaPosition * (((a.Radius + b.Radius) - deltaLength) / deltaLength);
-
-
-
-            // resolve intersection --
-            // inverse mass quantities
-            double im1 = 1.0 / a.Radius;
-            double im2 = 1.0 / b.Radius;
-
-            // push-pull them apart based off their mass
-            a.Position = a.Position + (mtd * (im1 / (im1 + im2))) + adjustment;
-            b.Position = b.Position - (mtd * (im2 / (im1 + im2))) - adjustment;
-
-
-     
-
-            // impact speed
-            Vector v = a.Velocity-b.Velocity;
-            Vector mtdNormalized = new Vector(mtd.X, mtd.Y);
-            mtdNormalized.Normalize();
-            double vn = v*mtdNormalized;
-
-            // sphere intersecting but moving away from each other already
-            if (vn > 0.0f) return;
-
-            // collision impulse
-            double i = (-(1.0 + Restitution) * vn) / (im1 + im2);
-            Vector impulse = mtdNormalized * (i);
-
-            Vector aNewVelocity = a.Velocity + (impulse * (im1));
-            Vector bNewVelocity = b.Velocity - (impulse * (im2));
-
-
-
-            // change in momentum
-            a.Velocity = aNewVelocity * 0.58;
-            b.Velocity = bNewVelocity * 0.58;
-
         }
 
         internal void DetectCollisions(List<IdeaBall> items)
@@ -233,7 +245,7 @@ namespace SurfaceApplication1
                     {
                         //this.Ellipse.Fill = new SolidColorBrush()
                         {
-                            //Color = Colors.Red
+                          //  Color = Colors.Red
                         };
                         ResolveCollision(this, ball);
                     };
