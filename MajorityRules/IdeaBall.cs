@@ -17,6 +17,7 @@ namespace SurfaceApplication1
     {
         private const float Friction = 0.6f;
         private const int InitRadius = 25;
+        private Random random;
         private const double Restitution = 1;
         private static Vector adjustment = new Vector(0.0001, 0.0001);
         private TouchDevice ellipseControlTouchDevice;
@@ -43,11 +44,12 @@ namespace SurfaceApplication1
 
 
 
-        public IdeaBall(Vector Position, Vector Velocity, Canvas mainCanvas, int rad)
+        public IdeaBall(Vector Position, Vector Velocity, Canvas mainCanvas, int rad, Color c)
         {
+            random = new Random();
             SolidColorBrush fill = new SolidColorBrush()
             {
-                Color = Colors.Green
+                Color = c
             };
 
             this.Velocity = Velocity;
@@ -72,7 +74,7 @@ namespace SurfaceApplication1
             {
                 // Forget about this contact.
                 ellipseControlTouchDevice = null;
-                this.Velocity = new Vector(deltaX+3, deltaY+3);
+                this.Velocity = new Vector(deltaX*5, deltaY*5);
                 this.IsTouched = false;
             }
 
@@ -215,7 +217,7 @@ namespace SurfaceApplication1
                 if (vn > 0.0f) return;
 
                 // collision impulse
-                if (vn < -10.0f)
+                if (vn < -28.0f)
                 {
                 double i = (-(1.0 + Restitution) * vn) / (im1 + im2);
                 Vector impulse = mtdNormalized * (i);
@@ -226,17 +228,14 @@ namespace SurfaceApplication1
 
 
                 // change in momentum
-                a.Velocity = aNewVelocity * 0.75;
-                b.Velocity = bNewVelocity * 0.75;
+                a.Velocity = aNewVelocity * 0.3;
+                b.Velocity = bNewVelocity * 0.3;
             }
         }
 
         internal void DetectCollisions(List<IdeaBall> items)
         {
-            this.Ellipse.Fill = new SolidColorBrush()
-            {
-                Color = Colors.Green
-            };
+           
             foreach (IdeaBall ball in items)
             {
                 if (!this.Equals(ball))

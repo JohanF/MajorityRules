@@ -28,7 +28,7 @@ namespace SurfaceApplication1
         private Stopwatch stopWatch = new Stopwatch();
         private int lastTime;
         private int deltaTime;
-        private double gravity = 1.5;
+        private double gravity = 2.5;
         private double rotation = 0;
         private Point centerOfGravity;
         private Point centerOfRotation;
@@ -81,9 +81,9 @@ namespace SurfaceApplication1
 
             theta = 180 / Math.PI;
 
-            for (int i = 0; i < 40; i++)
+            for (int i = 0; i < 80; i++)
             {
-                items.Add(new IdeaBall(new Vector(random.Next(0, 800), random.Next(0, 600)), new Vector(random.Next(2, 5), random.Next(2, 5)), this._mainCanvas, random.Next(2, 5)*10));
+                items.Add(new IdeaBall(new Vector(random.Next(151, 800), random.Next(0, 600)), new Vector(random.Next(2, 5), random.Next(2, 5)), this._mainCanvas, random.Next(2, 8) * 10, Color.FromArgb((byte)random.Next(0, 255), (byte)random.Next(0, 255), (byte)random.Next(0, 255), (byte)random.Next(0, 255))));
             }
             //items.Add(new IdeaBall(new Vector(100, 100), new Vector(5.1, 5)));
             //items.Add(new IdeaBall(new Vector(500, 500), new Vector(-5, -5)));
@@ -146,8 +146,8 @@ namespace SurfaceApplication1
                 }
 
 
-                ball.Velocity = ball.Velocity * 0.68;
-                if (!ball.IsTouched) ball.Velocity = ball.Velocity + calcGravity(ball.Position.X, ball.Position.Y, centerOfGravity, gravity) + calcGravity(ball.Position.X, ball.Position.Y, centerOfRotation, rotation);
+                ball.Velocity = ball.Velocity * 0.85;
+                if (!ball.IsTouched) ball.Velocity = ball.Velocity + calcGravity(ball.Position.X, ball.Position.Y, centerOfGravity, gravity);
                 if (ball.Position.X >= _viewportWidthMax - ball.Radius && ball.Velocity.X > 0) ball.Velocity = new Vector(-ball.Velocity.X, ball.Velocity.Y);
                 if (ball.Position.X <= _viewportWidthMin + ball.Radius && ball.Velocity.X < 0) ball.Velocity = new Vector(-ball.Velocity.X, ball.Velocity.Y);
                 if (ball.Position.Y >= _viewportHeightMax - ball.Radius && ball.Velocity.Y > 0) ball.Velocity = new Vector(ball.Velocity.X, -ball.Velocity.Y);
@@ -178,18 +178,24 @@ namespace SurfaceApplication1
             double dY = vY - attractor.Y;
             double dX = vX - attractor.X;
 
+
+
             Vector newGravVelocity = new Vector();
 
-            if (Math.Abs(dY) < 2 && Math.Abs(dX) < 2) return newGravVelocity;
+            if (Math.Abs(dY) < 250 && Math.Abs(dX) < 250) return newGravVelocity;
 
             double angleInDegrees = Math.Atan2(dY, dX) * 180 / Math.PI;
 
             //b.Text = System.Convert.ToString("Cos = " + Math.Cos(angleInDegrees) + "Sin = " + Math.Sin(angleInDegrees));
 
-
-            newGravVelocity.X = G * (Math.Cos(angleInDegrees));
-            newGravVelocity.Y = G * (Math.Sin(angleInDegrees));
-
+            if (Math.Abs(dY) < 1)
+            {
+                newGravVelocity.X = G;
+            } else
+            {
+                newGravVelocity.X = G * (Math.Cos(angleInDegrees));
+                newGravVelocity.Y = G * (Math.Sin(angleInDegrees));
+            }
 
             return newGravVelocity;
 
