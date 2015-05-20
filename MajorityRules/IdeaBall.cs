@@ -38,6 +38,7 @@ namespace SurfaceApplication1
                 _radius = value;
                 Ellipse.Width = value * 2;
                 Ellipse.Height = value * 2;
+                Title.Width = value * 2;
             }
         }
 
@@ -54,12 +55,25 @@ namespace SurfaceApplication1
             this.Position = Position;
             this.mainCanvas = mainCanvas;
             this.IsTouched = false;
+            this.UseGravity = true;
+
 
             Ellipse = new Ellipse()
             {
                 Fill = fill,
             };
+
+            Title = new TextBlock()
+            {
+                Text = "hej",
+                FontFamily = new FontFamily("Segoe UI"),
+                FontSize = 20,
+                IsHitTestVisible = false,
+                TextAlignment = System.Windows.TextAlignment.Center
+            };
+
             Radius = rad;
+
             Ellipse.TouchDown += new System.EventHandler<System.Windows.Input.TouchEventArgs>(Ellipse_TouchDown);
             Ellipse.TouchMove += new System.EventHandler<System.Windows.Input.TouchEventArgs>(Ellipse_TouchMove);
             Ellipse.TouchLeave += new System.EventHandler<System.Windows.Input.TouchEventArgs>(Ellipse_TouchLeave);
@@ -146,6 +160,9 @@ namespace SurfaceApplication1
         {
             Canvas.SetLeft(Ellipse, this.Position.X - Radius);
             Canvas.SetTop(Ellipse, this.Position.Y - Radius);
+
+            Canvas.SetLeft(Title, this.Position.X-Title.ActualWidth/2);
+            Canvas.SetTop(Title, this.Position.Y-Title.ActualHeight/2);
         }
 
         public static bool Intersects(IdeaBall a, IdeaBall b)
@@ -214,146 +231,51 @@ namespace SurfaceApplication1
                 // sphere intersecting but moving away from each other already
                 if (vn > 0.0f) return;
 
-                // collision impulse
-                if (vn < -10.0f)
+                if (vn >= -10.0f)
                 {
-                double i = (-(1.0 + Restitution) * vn) / (im1 + im2);
-                Vector impulse = mtdNormalized * (i);
+                    UseGravity = false;
+                    return;
+                }
+                UseGravity = true;
 
-                Vector aNewVelocity = a.Velocity + (impulse * (im1));
-                Vector bNewVelocity = b.Velocity - (impulse * (im2));
+            
+                    
+                    double i = (-(1.0 + Restitution) * vn) / (im1 + im2);
+                    Vector impulse = mtdNormalized * (i);
 
+                    Vector aNewVelocity = a.Velocity + (impulse * (im1));
+                    Vector bNewVelocity = b.Velocity - (impulse * (im2));
 
-
-                // change in momentum
-                a.Velocity = aNewVelocity * 0.75;
-                b.Velocity = bNewVelocity * 0.75;
-            }
+                    // change in momentum
+                    a.Velocity = aNewVelocity * 0.75;
+                    b.Velocity = bNewVelocity * 0.75;
         }
 
         internal void DetectCollisions(List<IdeaBall> items)
         {
-            this.Ellipse.Fill = new SolidColorBrush()
-            {
-                Color = Colors.Green
-            };
             foreach (IdeaBall ball in items)
             {
                 if (!this.Equals(ball))
                 {
                     if (Intersects(this, ball) && Collides(this, ball))
                     {
-                        //this.Ellipse.Fill = new SolidColorBrush()
-                        {
-                          //  Color = Colors.Red
-                        };
                         ResolveCollision(this, ball);
                     };
                 }
             }
         }
-        /*
-	    public static Vector VectorNewPlane(Vector velocity, double rotation) {
-		    //alfa = the x-vectors angle towards the new plane
-		    //beta = the y-vectors angle towards the new plane
-		    double alfa = Math.PI/2 - rotation;
-		    double beta = - rotation;
-		
-		    //the x- and y-vectors for the new plane
-		    Vector newVelocity = new Vector();
-		    newVelocity.X = (float) (velocity.Y * Math.Cos(alfa) + velocity.X * Math.Cos(beta));
-		    newVelocity.Y = (float) (velocity.Y * Math.Sin(alfa) + velocity.X * Math.Sin(beta));
-		    return newVelocity;
-	    }
 
-        /*
-        public static void HandleCollision(Vector v1, Vector v2, double weight1, double weight2)
+        internal void AttachTo(Canvas MainCanvas)
         {
-		    /*
-		     * v1 = ( (m1 - m2)*u1 + 2*m2*u2 ) / (m1 + m2)
-		     * v2 = ( (m2 - m1)*u2 + 2*m1*u1 ) / (m1 + m2)
-                     
-            double momentum = v1.X * weight1 + v2.X * weight2;
-            double kinetic = v1.X * v1.X * weight1 / 2 + v2.X * v2.X * weight2 / 2;
-            Vector tmp = new Vector();
-            tmp.X = ((weight1 - weight2) * v1.X + 2 * weight2 * v2.X) / (weight1 + weight2);
-            v2.X = ((weight2 - weight1) * v2.X + 2 * weight1 * v1.X) / (weight1 + weight2);
-            v1.X = tmp.X;
-        
-		
-	    }
-        */
-        /*
-        private static void CalculateNewVelocities(IdeaBall a, IdeaBall b, float distance)
+            MainCanvas.Children.Add(this.Ellipse);
+            MainCanvas.Children.Add(this.Title);
+        }
+
+        internal void ApplyScale(Vector vector, double p, Point point)
         {
-            Vector vecA = new Vector(a.X, a.Y);
-            Vector vecB = new Vector(b.X, b.Y);
+            throw new NotImplementedException();
+        }
 
-            double rotation = Math.Atan((vecA.Y - vecB.Y) / (vecA.X - vecB.X));
-            if (vecB.X > vecA.X)
-            {
-                rotation = Math.PI + rotation;
-            }
-
-            Vector oldVelocityA = new Vector(a.Vx, a.Vy);
-            Vector oldVelocityB = new Vector(b.Vx, b.Vy);
-            Vector newVelocityA = VectorNewPlane(oldVelocityA, rotation);
-            Vector newVelocityB = VectorNewPlane(oldVelocityB, rotation);
-
-            //TODO: fix radius
-            double weightA = 1;
-            double weightB = 1;
-
-
-            // 3) handle collision (only x-velocity)
-            HandleCollision(newVelocityA, newVelocityB, weightA, weightB);
-
-            // 4) convert the new velocity back to the normal plane system
-            Vector tmp = VectorNewPlane(newVelocityA, -rotation);
-            oldVelocityA.X = tmp.X;
-            oldVelocityA.Y = tmp.Y;
-            tmp = VectorNewPlane(newVelocityB, -rotation);
-            oldVelocityB.X = tmp.X;
-            oldVelocityB.Y = tmp.Y;
-
-            a.Vx = (float)oldVelocityA.X;
-            a.Vy = (float)oldVelocityA.Y;
-
-            b.Vx = (float)oldVelocityB.X;
-            b.Vy = (float)oldVelocityB.Y;
-
-            // 5) update balls position
-            double collision = (a.Radius + b.Radius) - distance/2;
-            
-            a.X += Convert.ToInt16(collision * Math.Cos(rotation));
-            a.Y += Convert.ToInt16(collision * Math.Sin(rotation));
-
-            b.X += Convert.ToInt16(-collision * Math.Cos(rotation));
-            b.Y += Convert.ToInt16(-collision * Math.Sin(rotation));
-           
-            /*
-            int mass1 = a.Radius;
-            int mass2 = b.Radius;
-            float velX1 = a.Vx;
-            float velX2 = b.Vx;
-            float velY1 = a.Vy;
-            float velY2 = b.Vy;
-
-            float newVelX1 = (velX1 * (mass1 - mass2) + (2 * mass2 * velX2)) / (mass1 + mass2);
-            float newVelX2 = (velX2 * (mass2 - mass1) + (2 * mass1 * velX1)) / (mass1 + mass2);
-            float newVelY1 = (velY1 * (mass1 - mass2) + (2 * mass2 * velY2)) / (mass1 + mass2);
-            float newVelY2 = (velY2 * (mass2 - mass1) + (2 * mass1 * velY1)) / (mass1 + mass2);
-
-            a.Vx = newVelX1;
-            b.Vx = newVelX2;
-            a.Vy = newVelY1;
-            b.Vy = newVelY2;
-
-            a.X = a.X + Convert.ToInt16(newVelX1);
-            a.Y = a.Y + Convert.ToInt16(newVelY1);
-            b.X = b.X + Convert.ToInt16(newVelX2);
-            b.Y = b.Y + Convert.ToInt16(newVelY2);
-        }*/
-        
+        public bool UseGravity { get; set; }
     }
 }

@@ -51,6 +51,7 @@ namespace SurfaceApplication1
 
         public CanvasController(Canvas MainCanvas)
         {
+
             /*
             SolidColorBrush fill = new SolidColorBrush()
             {
@@ -93,36 +94,34 @@ namespace SurfaceApplication1
 
             foreach (IdeaBall ball in items)
             {
-                MainCanvas.Children.Add(ball.Ellipse);
+                ball.AttachTo(MainCanvas);
             }
 
             //MainCanvas.Children.Add(this.eli);
 
-            DispatcherTimer timer = new DispatcherTimer();
-            //System.Timers.Timer timer = new System.Timers.Timer();
-
-            timer.Interval = new TimeSpan(0, 0, 0, 0, 1000 / Fps);
-            timer.Tick += new EventHandler(Update);
+            DispatcherTimer dispatchTimer = new DispatcherTimer();
+            System.Timers.Timer timer = new System.Timers.Timer();
+            timer.Elapsed += new ElapsedEventHandler(BackgroundUpdate);
+            timer.Interval = 1000 / Fps;
             timer.Start();
+
+            dispatchTimer.Interval = new TimeSpan(0, 0, 0, 0, 1000 / Fps);
+            dispatchTimer.Tick += new EventHandler(Update);
+            dispatchTimer.Start();
+
+            MainCanvas.ManipulationDelta += new EventHandler<System.Windows.Input.ManipulationDeltaEventArgs>(MainCanvas_ManipulationDelta);
         }
 
-
-
-        private void Update(object sender, EventArgs e)
+        void BackgroundUpdate(object sender, ElapsedEventArgs e)
         {
             int currentTime = stopWatch.Elapsed.Milliseconds;
             deltaTime = lastTime - currentTime;
-            //Debug.WriteLine("----");
-            //Debug.WriteLine(deltaTime);
-            //Debug.WriteLine(1000/deltaTime);
 
             lastTime = currentTime;
             Random randomGenerator = new Random();
 
-            //Canvas.SetLeft(eli, centerOfRotation.X);
-            //Canvas.SetTop(eli, centerOfRotation.Y);
-
-            foreach (IdeaBall ball in items){
+            foreach (IdeaBall ball in items)
+            {
 
                 ball.Velocity *= 0.99;
                 if (Math.Abs(ball.Velocity.X) < 0.00001) //TODO threashold
@@ -147,23 +146,35 @@ namespace SurfaceApplication1
 
 
                 ball.Velocity = ball.Velocity * 0.68;
-                if (!ball.IsTouched) ball.Velocity = ball.Velocity + calcGravity(ball.Position.X, ball.Position.Y, centerOfGravity, gravity) + calcGravity(ball.Position.X, ball.Position.Y, centerOfRotation, rotation);
+                if (!ball.IsTouched && ball.UseGravity) ball.Velocity = ball.Velocity + calcGravity(ball.Position.X, ball.Position.Y, centerOfGravity, gravity) + calcGravity(ball.Position.X, ball.Position.Y, centerOfRotation, rotation);
                 if (ball.Position.X >= _viewportWidthMax - ball.Radius && ball.Velocity.X > 0) ball.Velocity = new Vector(-ball.Velocity.X, ball.Velocity.Y);
                 if (ball.Position.X <= _viewportWidthMin + ball.Radius && ball.Velocity.X < 0) ball.Velocity = new Vector(-ball.Velocity.X, ball.Velocity.Y);
                 if (ball.Position.Y >= _viewportHeightMax - ball.Radius && ball.Velocity.Y > 0) ball.Velocity = new Vector(ball.Velocity.X, -ball.Velocity.Y);
                 if (ball.Position.Y <= _viewportHeightMin + ball.Radius && ball.Velocity.Y < 0) ball.Velocity = new Vector(ball.Velocity.X, -ball.Velocity.Y);
-
-                ball.Draw();
             }
             foreach (IdeaBall ball in items)
             {
                 ball.DetectCollisions(items);
             }
+        }
 
-            
+        void MainCanvas_ManipulationDelta(object sender, System.Windows.Input.ManipulationDeltaEventArgs e)
+        {
+            Debug.WriteLine(e.DeltaManipulation.Scale);
+            foreach (IdeaBall ball in items)
+            {
+                ball.ApplyScale(e.DeltaManipulation.Scale, e.DeltaManipulation.Translation.Length, e.ManipulationOrigin);
+            }
+        }
 
 
-            
+
+        private void Update(object sender, EventArgs e)
+        {
+            foreach (IdeaBall ball in items)
+            {
+                ball.Draw();
+            }
         }
 
         public void DetectCollisions()
