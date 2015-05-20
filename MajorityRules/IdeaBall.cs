@@ -25,10 +25,13 @@ namespace SurfaceApplication1
         private Point lastPoint;
         private double deltaX;
         private double deltaY;
+        private int holdTime;
+        private CanvasController CanvasC;
 
         public Vector Position { get; set; }
         public Vector Velocity { get; set; }
         public bool IsTouched { get; set; }
+        public bool affectedByGravity { get; set; }
 
         private int _radius;
         public int Radius
@@ -44,7 +47,7 @@ namespace SurfaceApplication1
 
 
 
-        public IdeaBall(Vector Position, Vector Velocity, Canvas mainCanvas, int rad, Color c)
+        public IdeaBall(Vector Position, Vector Velocity, Canvas mainCanvas, int rad, Color c, CanvasController CC)
         {
             random = new Random();
             SolidColorBrush fill = new SolidColorBrush()
@@ -52,10 +55,13 @@ namespace SurfaceApplication1
                 Color = c
             };
 
+            this.CanvasC = CC;
             this.Velocity = Velocity;
             this.Position = Position;
             this.mainCanvas = mainCanvas;
             this.IsTouched = false;
+            this.holdTime = 0;
+            this.affectedByGravity = true;
 
             Ellipse = new Ellipse()
             {
@@ -72,9 +78,10 @@ namespace SurfaceApplication1
             // If this contact is the one that was remembered  
             if (e.TouchDevice == ellipseControlTouchDevice)
             {
+                holdTime = 0;
                 // Forget about this contact.
                 ellipseControlTouchDevice = null;
-                this.Velocity = new Vector(deltaX*5, deltaY*5);
+                this.Velocity = new Vector(deltaX*2, deltaY*2);
                 this.IsTouched = false;
             }
 
@@ -89,7 +96,9 @@ namespace SurfaceApplication1
             {
                 // Get the current position of the contact.  
                 Point currentTouchPoint = ellipseControlTouchDevice.GetCenterPosition(this.mainCanvas);
-                    
+
+                holdTime = 0;
+
                 // Get the change between the controlling contact point and
                 // the changed contact point.  
                 deltaX = currentTouchPoint.X - lastPoint.X;
@@ -117,6 +126,18 @@ namespace SurfaceApplication1
             e.TouchDevice.Capture(sender as Ellipse);
 
             this.IsTouched = true;
+
+            if (holdTime == 0)
+            {
+                holdTime = CanvasController.deltaTime;
+            }
+
+            if ((CanvasController.deltaTime - holdTime) > 5)
+            {
+                this.affectedByGravity = false;
+                Point centerPos = ellipseControlTouchDevice.GetCenterPosition(this.mainCanvas);
+                CanvasC.addGravityPoints(centerPos);
+            }
 
             // Remember this contact if a contact has not been remembered already.  
             // This contact is then used to move the ellipse around.
@@ -222,14 +243,14 @@ namespace SurfaceApplication1
                 double i = (-(1.0 + Restitution) * vn) / (im1 + im2);
                 Vector impulse = mtdNormalized * (i);
 
-                Vector aNewVelocity = a.Velocity + (impulse * (im1));
-                Vector bNewVelocity = b.Velocity - (impulse * (im2));
+                Vector aNewVelocity = a.Velocity + (impulse * (im1)) ;
+                Vector bNewVelocity = b.Velocity - (impulse * (im2)) ;
 
 
 
                 // change in momentum
-                a.Velocity = aNewVelocity * 0.3;
-                b.Velocity = bNewVelocity * 0.3;
+                a.Velocity = aNewVelocity * CanvasController.deltaTime/1000;
+                b.Velocity = bNewVelocity * CanvasController.deltaTime/1000;
             }
         }
 

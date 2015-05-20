@@ -27,7 +27,7 @@ namespace SurfaceApplication1
         private Random random = new Random();
         private Stopwatch stopWatch = new Stopwatch();
         private int lastTime;
-        private int deltaTime;
+        public static int deltaTime;
         private double gravity = 2.5;
         private double rotation = 0;
         private Point centerOfGravity;
@@ -36,6 +36,8 @@ namespace SurfaceApplication1
         private Ellipse eli;
         private const int InitRadius = 25;  
         private int rotationDampening = 15;
+
+        public List<Point> gravityWells;
 
         private int _radius;
         private int Radius
@@ -83,7 +85,7 @@ namespace SurfaceApplication1
 
             for (int i = 0; i < 80; i++)
             {
-                items.Add(new IdeaBall(new Vector(random.Next(151, 800), random.Next(0, 600)), new Vector(random.Next(2, 5), random.Next(2, 5)), this._mainCanvas, random.Next(2, 8) * 10, Color.FromArgb((byte)random.Next(0, 255), (byte)random.Next(0, 255), (byte)random.Next(0, 255), (byte)random.Next(0, 255))));
+                items.Add(new IdeaBall(new Vector(random.Next(151, 800), random.Next(0, 600)), new Vector(random.Next(2, 5), random.Next(2, 5)), this._mainCanvas, random.Next(2, 8) * 10, Color.FromArgb((byte)random.Next(0, 255), (byte)random.Next(0, 255), (byte)random.Next(0, 255), (byte)random.Next(0, 255)), this));
             }
             //items.Add(new IdeaBall(new Vector(100, 100), new Vector(5.1, 5)));
             //items.Add(new IdeaBall(new Vector(500, 500), new Vector(-5, -5)));
@@ -97,10 +99,10 @@ namespace SurfaceApplication1
             }
 
             //MainCanvas.Children.Add(this.eli);
+            this.gravityWells.Add(centerOfGravity);
 
             DispatcherTimer timer = new DispatcherTimer();
             //System.Timers.Timer timer = new System.Timers.Timer();
-
             timer.Interval = new TimeSpan(0, 0, 0, 0, 1000 / Fps);
             timer.Tick += new EventHandler(Update);
             timer.Start();
@@ -145,9 +147,16 @@ namespace SurfaceApplication1
                     rotationDampening--;
                 }
 
+                
 
                 ball.Velocity = ball.Velocity * 0.85;
-                if (!ball.IsTouched) ball.Velocity = ball.Velocity + calcGravity(ball.Position.X, ball.Position.Y, centerOfGravity, gravity);
+                if (!ball.IsTouched && ball.affectedByGravity){
+
+                    foreach (Point gp in gravityWells)
+                    {
+                        ball.Velocity = ball.Velocity + calcGravity(ball.Position.X, ball.Position.Y, gp, gravity);
+                    }
+                }
                 if (ball.Position.X >= _viewportWidthMax - ball.Radius && ball.Velocity.X > 0) ball.Velocity = new Vector(-ball.Velocity.X, ball.Velocity.Y);
                 if (ball.Position.X <= _viewportWidthMin + ball.Radius && ball.Velocity.X < 0) ball.Velocity = new Vector(-ball.Velocity.X, ball.Velocity.Y);
                 if (ball.Position.Y >= _viewportHeightMax - ball.Radius && ball.Velocity.Y > 0) ball.Velocity = new Vector(ball.Velocity.X, -ball.Velocity.Y);
@@ -171,6 +180,11 @@ namespace SurfaceApplication1
 
         }
 
+        public void addGravityPoints(Point g)
+        {
+            this.gravityWells.Add(g);
+        }
+
 
         private Vector calcGravity(double vX, double vY, Point attractor, double G)
         {
@@ -188,7 +202,7 @@ namespace SurfaceApplication1
 
             //b.Text = System.Convert.ToString("Cos = " + Math.Cos(angleInDegrees) + "Sin = " + Math.Sin(angleInDegrees));
 
-            if (Math.Abs(dY) < 1)
+            if (Math.Abs(dY) < 3)
             {
                 newGravVelocity.X = G;
             } else
