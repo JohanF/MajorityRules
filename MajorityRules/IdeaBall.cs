@@ -28,6 +28,7 @@ namespace SurfaceApplication1
         private int holdTime;
         private CanvasController CanvasC;
 
+        public Vector gravPosition { get; set; }
         public Vector Position { get; set; }
         public Vector Velocity { get; set; }
         public bool IsTouched { get; set; }
@@ -83,6 +84,7 @@ namespace SurfaceApplication1
                 ellipseControlTouchDevice = null;
                 this.Velocity = new Vector(deltaX*2, deltaY*2);
                 this.IsTouched = false;
+                if (!this.affectedByGravity) this.gravPosition = this.Position;
             }
 
             // Mark this event as handled.  
@@ -97,7 +99,13 @@ namespace SurfaceApplication1
                 // Get the current position of the contact.  
                 Point currentTouchPoint = ellipseControlTouchDevice.GetCenterPosition(this.mainCanvas);
 
-                holdTime = 0;
+                if ((CanvasController.deltaTime - holdTime) > 1000)
+                {
+                    this.gravPosition = this.Position;
+                    this.affectedByGravity = false;
+                    Point centerPos = ellipseControlTouchDevice.GetCenterPosition(this.mainCanvas);
+                    CanvasC.addGravityPoints(this);
+                }
 
                 // Get the change between the controlling contact point and
                 // the changed contact point.  
@@ -132,12 +140,7 @@ namespace SurfaceApplication1
                 holdTime = CanvasController.deltaTime;
             }
 
-            if ((CanvasController.deltaTime - holdTime) > 5)
-            {
-                this.affectedByGravity = false;
-                Point centerPos = ellipseControlTouchDevice.GetCenterPosition(this.mainCanvas);
-                CanvasC.addGravityPoints(centerPos);
-            }
+            
 
             // Remember this contact if a contact has not been remembered already.  
             // This contact is then used to move the ellipse around.
@@ -202,6 +205,7 @@ namespace SurfaceApplication1
             // get the mtd
             //Vector deltaPosition = new Vector(a.Position.X - b.Position.X, a.Position.Y - b.Position.Y-0.00001);
             
+               
 
                 Vector deltaPosition = a.Position - b.Position;
 
@@ -240,17 +244,19 @@ namespace SurfaceApplication1
                 // collision impulse
                 if (vn < -28.0f)
                 {
-                double i = (-(1.0 + Restitution) * vn) / (im1 + im2);
-                Vector impulse = mtdNormalized * (i);
+                    double i = (-(1.0 + Restitution) * vn) / (im1 + im2);
+                    Vector impulse = mtdNormalized * (i);
 
-                Vector aNewVelocity = a.Velocity + (impulse * (im1)) ;
-                Vector bNewVelocity = b.Velocity - (impulse * (im2)) ;
+                    Vector aNewVelocity = a.Velocity + (impulse * (im1));
+                    Vector bNewVelocity = b.Velocity - (impulse * (im2));
 
 
 
-                // change in momentum
-                a.Velocity = aNewVelocity * CanvasController.deltaTime/1000;
-                b.Velocity = bNewVelocity * CanvasController.deltaTime/1000;
+                    // change in momentum if(!a.affectedByGravity){
+                
+                    if (a.affectedByGravity) a.Velocity = aNewVelocity * CanvasController.deltaTime / 1000;
+                    if (b.affectedByGravity) b.Velocity = bNewVelocity * CanvasController.deltaTime / 1000;
+                
             }
         }
 

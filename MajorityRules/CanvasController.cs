@@ -37,7 +37,7 @@ namespace SurfaceApplication1
         private const int InitRadius = 25;  
         private int rotationDampening = 15;
 
-        public List<Point> gravityWells;
+        public List<IdeaBall> gravityWells;
 
         private int _radius;
         private int Radius
@@ -74,6 +74,7 @@ namespace SurfaceApplication1
             this._mainCanvas = MainCanvas;
             this.centerOfGravity = new Point();
             this.centerOfRotation = new Point();
+            this.gravityWells = new List<IdeaBall>();
 
             centerOfGravity.X = 1920/2;
             centerOfGravity.Y = 1080/2;
@@ -99,7 +100,7 @@ namespace SurfaceApplication1
             }
 
             //MainCanvas.Children.Add(this.eli);
-            this.gravityWells.Add(centerOfGravity);
+            //this.gravityWells.Add(centerOfGravity);
 
             DispatcherTimer timer = new DispatcherTimer();
             //System.Timers.Timer timer = new System.Timers.Timer();
@@ -152,15 +153,38 @@ namespace SurfaceApplication1
                 ball.Velocity = ball.Velocity * 0.85;
                 if (!ball.IsTouched && ball.affectedByGravity){
 
-                    foreach (Point gp in gravityWells)
+                    IdeaBall cloxest = null;
+
+                    foreach (IdeaBall ib in gravityWells)
                     {
-                        ball.Velocity = ball.Velocity + calcGravity(ball.Position.X, ball.Position.Y, gp, gravity);
+                        if (inGravityRange(ib, ball))
+                        {
+                            if (cloxest != null)
+                            {
+                                if ((gravDist(ib, ball) < gravDist(cloxest, ball))) cloxest = ib;
+                            }
+                            else
+                            {
+                                cloxest = ib;
+                            }
+                        }
+                    }
+
+                    if (cloxest != null)
+                    {
+                        ball.Velocity = ball.Velocity + calcGravity(ball.Position.X, ball.Position.Y, (Point)cloxest.Position, gravity);
+                    }
+                    else
+                    {
+                        ball.Velocity = ball.Velocity + calcGravity(ball.Position.X, ball.Position.Y, centerOfGravity, gravity);
                     }
                 }
                 if (ball.Position.X >= _viewportWidthMax - ball.Radius && ball.Velocity.X > 0) ball.Velocity = new Vector(-ball.Velocity.X, ball.Velocity.Y);
                 if (ball.Position.X <= _viewportWidthMin + ball.Radius && ball.Velocity.X < 0) ball.Velocity = new Vector(-ball.Velocity.X, ball.Velocity.Y);
                 if (ball.Position.Y >= _viewportHeightMax - ball.Radius && ball.Velocity.Y > 0) ball.Velocity = new Vector(ball.Velocity.X, -ball.Velocity.Y);
                 if (ball.Position.Y <= _viewportHeightMin + ball.Radius && ball.Velocity.Y < 0) ball.Velocity = new Vector(ball.Velocity.X, -ball.Velocity.Y);
+                if (!ball.affectedByGravity && !ball.IsTouched) ball.Position = ball.gravPosition;
+
 
                 ball.Draw();
             }
@@ -180,9 +204,9 @@ namespace SurfaceApplication1
 
         }
 
-        public void addGravityPoints(Point g)
+        public void addGravityPoints(IdeaBall b)
         {
-            this.gravityWells.Add(g);
+            this.gravityWells.Add(b);
         }
 
 
@@ -196,7 +220,7 @@ namespace SurfaceApplication1
 
             Vector newGravVelocity = new Vector();
 
-            if (Math.Abs(dY) < 250 && Math.Abs(dX) < 250) return newGravVelocity;
+            if (Math.Abs(dY) < 25 && Math.Abs(dX) < 25) return newGravVelocity;
 
             double angleInDegrees = Math.Atan2(dY, dX) * 180 / Math.PI;
 
@@ -215,6 +239,32 @@ namespace SurfaceApplication1
 
         }
 
+        private static bool inGravityRange(IdeaBall a, IdeaBall b)
+        {
+            double dX = a.Position.X - b.Position.X;
+            double dY = a.Position.Y - b.Position.Y;
+
+            double gravRadius = a.Radius*2 + b.Radius;
+            double sqrRadius = gravRadius * gravRadius;
+
+            double distSqr = (dX * dX) + (dY * dY);
+
+            if (distSqr <= sqrRadius)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        private double gravDist(IdeaBall a, IdeaBall b)
+        {
+            double dX = a.Position.X - b.Position.X;
+            double dY = a.Position.Y - b.Position.Y;
+            double distSqr = (dX * dX) + (dY * dY);
+            return distSqr;
+        }
+
         static Point RotatePoint(Point pointToRotate, Point centerPoint, double angleInDegrees)
                         {
                         double angleInRadians = angleInDegrees * (Math.PI / 180);
@@ -231,7 +281,8 @@ namespace SurfaceApplication1
                         (sinTheta * (pointToRotate.X - centerPoint.X) +
                         cosTheta * (pointToRotate.Y - centerPoint.Y) + centerPoint.Y)
                         };
-}
+
+            }
 
 
     }
