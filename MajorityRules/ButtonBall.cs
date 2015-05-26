@@ -19,8 +19,13 @@ namespace SurfaceApplication1
 
         protected override void Ellipse_TouchLeave(object sender, System.Windows.Input.TouchEventArgs e)
         {
+            // Remember where this contact took place.  
+            base.Ellipse_TouchLeave(sender, e);
             Debug.WriteLine("Ball pressed1");
-            if (base.deltaX < 2000 && deltaY < 2000)
+            Debug.WriteLine(deltaY);
+            Debug.WriteLine(deltaX);
+            Debug.WriteLine(isPressingMovement);
+            if (isPressingMovement)
             {
                 Debug.WriteLine("Ball pressed2");
             }

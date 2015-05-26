@@ -23,8 +23,10 @@ namespace SurfaceApplication1
         private TouchDevice ellipseControlTouchDevice;
         private Canvas mainCanvas;
         private Point lastPoint;
+        private Point releasePoint;
         protected double deltaX;
         protected double deltaY;
+        protected Boolean isPressingMovement;
 
         public Vector Position { get; set; }
         public Vector Velocity { get; set; }
@@ -42,6 +44,7 @@ namespace SurfaceApplication1
         }
 
         private int _radius;
+        private Point enterTouchPoint;
         public int Radius
         {
             get { return _radius; }
@@ -90,13 +93,24 @@ namespace SurfaceApplication1
 
         protected virtual void Ellipse_TouchLeave(object sender, System.Windows.Input.TouchEventArgs e)
         {
-            // If this contact is the one that was remembered  
+            // If this contact is the one that was remembered
             if (e.TouchDevice == ellipseControlTouchDevice)
             {
                 // Forget about this contact.
                 ellipseControlTouchDevice = null;
                 this.Velocity = new Vector(deltaX*5, deltaY*5);
                 this.IsTouched = false;
+            }
+            releasePoint = e.TouchDevice.GetTouchPoint(this.mainCanvas).Position;
+            double deltaTouchDownReleaseX = Math.Abs(releasePoint.X - enterTouchPoint.X);
+            double deltaTouchDownReleaseY = Math.Abs(releasePoint.Y - enterTouchPoint.Y);
+            if (deltaTouchDownReleaseX < 5 && deltaTouchDownReleaseY < 5)
+            {
+                isPressingMovement = true;
+            }
+            else
+            {
+                isPressingMovement = false;
             }
 
             // Mark this event as handled.  
@@ -148,6 +162,8 @@ namespace SurfaceApplication1
                 // Remember where this contact took place.  
                 lastPoint = ellipseControlTouchDevice.GetTouchPoint(this.mainCanvas).Position;
             }
+
+            enterTouchPoint = ellipseControlTouchDevice.GetTouchPoint(this.mainCanvas).Position;
 
             // Mark this event as handled.  
             e.Handled = true;
