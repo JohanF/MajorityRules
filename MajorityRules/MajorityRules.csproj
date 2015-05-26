@@ -68,6 +68,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="CanvasController.cs" />
+    <Compile Include="ButtonBall.cs" />
     <Compile Include="IdeaBall.cs" />
     <Compile Include="SurfaceCanvas.cs" />
     <Compile Include="SurfaceWindow1.xaml.cs">

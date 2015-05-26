@@ -23,8 +23,8 @@ namespace SurfaceApplication1
         private TouchDevice ellipseControlTouchDevice;
         private Canvas mainCanvas;
         private Point lastPoint;
-        private double deltaX;
-        private double deltaY;
+        protected double deltaX;
+        protected double deltaY;
 
         public Vector Position { get; set; }
         public Vector Velocity { get; set; }
@@ -88,7 +88,7 @@ namespace SurfaceApplication1
             Ellipse.TouchLeave += new System.EventHandler<System.Windows.Input.TouchEventArgs>(Ellipse_TouchLeave);
         }
 
-        void Ellipse_TouchLeave(object sender, System.Windows.Input.TouchEventArgs e)
+        protected virtual void Ellipse_TouchLeave(object sender, System.Windows.Input.TouchEventArgs e)
         {
             // If this contact is the one that was remembered  
             if (e.TouchDevice == ellipseControlTouchDevice)

@@ -20,6 +20,7 @@ namespace SurfaceApplication1
     {
         private Canvas _mainCanvas;
         private List<IdeaBall> items = new List<IdeaBall>();
+        private ButtonBall addButtonBall;
         private int _viewportWidthMax = 0;
         private int _viewportWidthMin = 0;
         private int _viewportHeightMax = 0;
@@ -69,6 +70,9 @@ namespace SurfaceApplication1
             Radius = InitRadius;
              */
 
+            Debug.WriteLine("width");
+            Debug.WriteLine(width);
+
             _viewportWidthMax = width;
             _viewportHeightMax = height;
 
@@ -89,7 +93,7 @@ namespace SurfaceApplication1
 
             for (int i = 0; i < 8; i++)
             {
-                items.Add(new IdeaBall(new Vector(random.Next(151, 800), random.Next(0, 600)), new Vector(random.Next(2, 5), random.Next(2, 5)), this._mainCanvas, random.Next(2, 8) * 10, Color.FromArgb((byte)random.Next(0, 255), (byte)random.Next(0, 255), (byte)random.Next(0, 255), (byte)random.Next(0, 255))));
+                items.Add(new IdeaBall(new Vector(random.Next(151, 800), random.Next(0, 600)), new Vector(random.Next(2, 5), random.Next(2, 5)), this._mainCanvas, random.Next(2, 8) * 10, Color.FromArgb(255, (byte)random.Next(0, 255), (byte)random.Next(0, 255), (byte)random.Next(0, 255))));
             }
             //items.Add(new IdeaBall(new Vector(100, 100), new Vector(5.1, 5)));
             //items.Add(new IdeaBall(new Vector(500, 500), new Vector(-5, -5)));
@@ -97,10 +101,16 @@ namespace SurfaceApplication1
             //items.Add(new IdeaBall(new Vector(200, 200), new Vector(5, 5)));
             //items.Add(new IdeaBall(new Vector(500, 500), new Vector(-5, -5)));
 
+            //add buttonBall to add new idead
+            addButtonBall = new ButtonBall(new Vector(random.Next(151, 800), random.Next(0, 600)), new Vector(random.Next(2, 5), random.Next(2, 5)), this._mainCanvas, random.Next(2, 8) * 10, Color.FromArgb(255, 255, 0, 0));
+            items.Add(addButtonBall);
+
             foreach (IdeaBall ball in items)
             {
                 ball.AttachTo(MainCanvas);
             }
+
+            
 
             //MainCanvas.Children.Add(this.eli);
 
@@ -113,7 +123,6 @@ namespace SurfaceApplication1
             dispatchTimer.Interval = new TimeSpan(0, 0, 0, 0, 1000 / Fps);
             dispatchTimer.Tick += new EventHandler(Update);
             dispatchTimer.Start();
-
 
             MainCanvas.ManipulationDelta += new EventHandler<System.Windows.Input.ManipulationDeltaEventArgs>(MainCanvas_ManipulationDelta);
         }
