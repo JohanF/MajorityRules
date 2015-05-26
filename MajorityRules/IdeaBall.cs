@@ -17,6 +17,7 @@ namespace SurfaceApplication1
     {
         private const float Friction = 0.6f;
         private const int InitRadius = 25;
+        private Random random;
         private const double Restitution = 1;
         private static Vector adjustment = new Vector(0.0001, 0.0001);
         private TouchDevice ellipseControlTouchDevice;
@@ -29,6 +30,17 @@ namespace SurfaceApplication1
         public Vector Velocity { get; set; }
         public bool IsTouched { get; set; }
 
+        private double _scale = 1;
+        public double Scale
+        {
+            get { return _scale; }
+            set
+            {
+                _scale = value;
+
+            }
+        }
+
         private int _radius;
         public int Radius
         {
@@ -36,26 +48,23 @@ namespace SurfaceApplication1
             set
             {
                 _radius = value;
-                Ellipse.Width = value * 2;
-                Ellipse.Height = value * 2;
-                Title.Width = value * 2;
             }
         }
 
 
 
-        public IdeaBall(Vector Position, Vector Velocity, Canvas mainCanvas, int rad)
+        public IdeaBall(Vector Position, Vector Velocity, Canvas mainCanvas, int rad, Color c)
         {
+            random = new Random();
             SolidColorBrush fill = new SolidColorBrush()
             {
-                Color = Colors.Green
+                Color = c
             };
 
             this.Velocity = Velocity;
             this.Position = Position;
             this.mainCanvas = mainCanvas;
             this.IsTouched = false;
-            this.UseGravity = true;
 
 
             Ellipse = new Ellipse()
@@ -86,7 +95,7 @@ namespace SurfaceApplication1
             {
                 // Forget about this contact.
                 ellipseControlTouchDevice = null;
-                this.Velocity = new Vector(deltaX+3, deltaY+3);
+                this.Velocity = new Vector(deltaX*5, deltaY*5);
                 this.IsTouched = false;
             }
 
@@ -158,8 +167,11 @@ namespace SurfaceApplication1
 
         public void Draw()
         {
-            Canvas.SetLeft(Ellipse, this.Position.X - Radius);
-            Canvas.SetTop(Ellipse, this.Position.Y - Radius);
+            Ellipse.Width = (Radius * 2) * Scale;
+            Ellipse.Height = Ellipse.Width;
+            Title.Width = Ellipse.Width;
+            Canvas.SetLeft(Ellipse, this.Position.X - (Ellipse.Width/2));
+            Canvas.SetTop(Ellipse, this.Position.Y - (Ellipse.Width/2));
 
             Canvas.SetLeft(Title, this.Position.X-Title.ActualWidth/2);
             Canvas.SetTop(Title, this.Position.Y-Title.ActualHeight/2);
@@ -231,24 +243,21 @@ namespace SurfaceApplication1
                 // sphere intersecting but moving away from each other already
                 if (vn > 0.0f) return;
 
-                if (vn >= -10.0f)
+                // collision impulse
+                if (vn >= -28.0f)
                 {
-                    UseGravity = false;
                     return;
                 }
-                UseGravity = true;
+                             
+                double i = (-(1.0 + Restitution) * vn) / (im1 + im2);
+                Vector impulse = mtdNormalized * (i);
 
-            
-                    
-                    double i = (-(1.0 + Restitution) * vn) / (im1 + im2);
-                    Vector impulse = mtdNormalized * (i);
+                Vector aNewVelocity = a.Velocity + (impulse * (im1));
+                Vector bNewVelocity = b.Velocity - (impulse * (im2));
 
-                    Vector aNewVelocity = a.Velocity + (impulse * (im1));
-                    Vector bNewVelocity = b.Velocity - (impulse * (im2));
-
-                    // change in momentum
-                    a.Velocity = aNewVelocity * 0.75;
-                    b.Velocity = bNewVelocity * 0.75;
+                // change in momentum
+                a.Velocity = aNewVelocity * 0.3;
+                b.Velocity = bNewVelocity * 0.3;
         }
 
         internal void DetectCollisions(List<IdeaBall> items)
@@ -271,11 +280,17 @@ namespace SurfaceApplication1
             MainCanvas.Children.Add(this.Title);
         }
 
-        internal void ApplyScale(Vector vector, double p, Point point)
+        internal void ApplyScale(Vector scale, double length, Point center)
         {
-            throw new NotImplementedException();
+            double translation =  length / 2;
+            Scale = scale.X;
+            if (center.X > Position.X) Position = new Vector(Position.X + translation, Position.Y);
+            if (center.X < Position.X) Position = new Vector(Position.X - translation, Position.Y);
+            if (center.Y > Position.Y) Position = new Vector(Position.X, Position.Y + translation);
+            if (center.Y < Position.Y) Position = new Vector(Position.X, Position.Y - translation);
+            
         }
 
-        public bool UseGravity { get; set; }
+        
     }
 }
