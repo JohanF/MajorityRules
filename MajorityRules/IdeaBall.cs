@@ -8,8 +8,8 @@ using Microsoft.Surface.Presentation;
 using System.Windows.Media;
 using System.Windows;
 using System.Diagnostics;
-using Microsoft.Surface.Presentation.Input;
 using System.Windows.Input;
+using Microsoft.Surface.Presentation.Input;
 
 namespace SurfaceApplication1
 {
@@ -25,9 +25,14 @@ namespace SurfaceApplication1
         private Point lastPoint;
         private double deltaX;
         private double deltaY;
-        private int holdTime;
         private CanvasController CanvasC;
+        private TextBlock testTxt;
+        private Boolean holding;
+        private Boolean gravityWell;
+        private Boolean pressingGravityWell;
 
+        public int holdTime { get; set; }
+        public Vector lastPos { get; set; }
         public Vector gravPosition { get; set; }
         public Vector Position { get; set; }
         public Vector Velocity { get; set; }
@@ -63,6 +68,10 @@ namespace SurfaceApplication1
             this.IsTouched = false;
             this.holdTime = 0;
             this.affectedByGravity = true;
+            this.holding = false;
+            this.lastPos = new Vector();
+            this.gravityWell = false;
+            this.pressingGravityWell = false;
 
             Ellipse = new Ellipse()
             {
@@ -72,6 +81,21 @@ namespace SurfaceApplication1
             Ellipse.TouchDown += new System.EventHandler<System.Windows.Input.TouchEventArgs>(Ellipse_TouchDown);
             Ellipse.TouchMove += new System.EventHandler<System.Windows.Input.TouchEventArgs>(Ellipse_TouchMove);
             Ellipse.TouchLeave += new System.EventHandler<System.Windows.Input.TouchEventArgs>(Ellipse_TouchLeave);
+
+            Ellipse.AddHandler(TouchExtensions.HoldGestureEvent, new RoutedEventHandler(Ellipse_HoldGestureEvent));
+            
+             
+               
+           // Ellipse.HoldGestureEvent += new System.EventHandler<System.Windows.Input.TouchEventArgs>(Ellipse_HoldGestureEvent);
+        }
+
+        void Ellipse_HoldGestureEvent(object sender, RoutedEventArgs e){
+            
+            if (e.Source.GetType() == this.GetType())
+            {
+                IdeaBall holdBall = e.Source as IdeaBall;
+
+            }
         }
 
         void Ellipse_TouchLeave(object sender, System.Windows.Input.TouchEventArgs e)
@@ -79,12 +103,28 @@ namespace SurfaceApplication1
             // If this contact is the one that was remembered  
             if (e.TouchDevice == ellipseControlTouchDevice)
             {
-                holdTime = 0;
+
+                
                 // Forget about this contact.
                 ellipseControlTouchDevice = null;
                 this.Velocity = new Vector(deltaX*2, deltaY*2);
                 this.IsTouched = false;
-                if (!this.affectedByGravity) this.gravPosition = this.Position;
+                if (!this.affectedByGravity)
+                {
+                    if (this.Position.X == lastPos.X && this.Position.Y == lastPos.Y && pressingGravityWell)
+                    {
+                        this.affectedByGravity = true;
+                        CanvasC.removeGravityPoints(this);
+                    }
+                    else
+                    {
+                        this.gravPosition = this.Position;
+                        this.gravityWell = true;
+                    }
+                }
+                holdTime = 0;
+                holding = false;
+
             }
 
             // Mark this event as handled.  
@@ -93,13 +133,33 @@ namespace SurfaceApplication1
 
         void Ellipse_TouchMove(object sender, System.Windows.Input.TouchEventArgs e)
         {
-
             if (e.TouchDevice == ellipseControlTouchDevice)
             {
                 // Get the current position of the contact.  
                 Point currentTouchPoint = ellipseControlTouchDevice.GetCenterPosition(this.mainCanvas);
 
-                if ((CanvasController.deltaTime - holdTime) > 1000)
+                // Get the change between the controlling contact point and
+                // the changed contact point.  
+                deltaX = currentTouchPoint.X - lastPoint.X;
+                deltaY = currentTouchPoint.Y - lastPoint.Y;
+
+                if(affectedByGravity){
+                
+                if (this.Position.X == lastPos.X && this.Position.Y == lastPos.Y)
+                {
+                    if (holdTime == 0 && !holding)
+                    {
+                        holding = true;
+                    }
+                }
+                else
+                {
+                    holdTime = 0;
+                    holding = false;
+                }
+
+
+                if ((CanvasController.deltaTime - holdTime) > 500 && this.affectedByGravity)
                 {
                     this.gravPosition = this.Position;
                     this.affectedByGravity = false;
@@ -107,16 +167,14 @@ namespace SurfaceApplication1
                     CanvasC.addGravityPoints(this);
                 }
 
-                // Get the change between the controlling contact point and
-                // the changed contact point.  
-                deltaX = currentTouchPoint.X - lastPoint.X;
-                deltaY = currentTouchPoint.Y - lastPoint.Y;
+            }
 
                 // Get and then set a new top position and a new left position for the ellipse. 
                 this.Position = new Vector(this.Position.X + (int)deltaX, this.Position.Y + (int)deltaY);
 
                 // Forget the old contact point, and remember the new contact point.  
                 lastPoint = currentTouchPoint;
+                if(affectedByGravity) lastPos = this.Position;
 
                 // Mark this event as handled.  
                 e.Handled = true;
@@ -135,12 +193,12 @@ namespace SurfaceApplication1
 
             this.IsTouched = true;
 
-            if (holdTime == 0)
+            if (!this.affectedByGravity)
             {
-                holdTime = CanvasController.deltaTime;
+                lastPos = this.Position;
+                pressingGravityWell = true;
             }
-
-            
+           
 
             // Remember this contact if a contact has not been remembered already.  
             // This contact is then used to move the ellipse around.

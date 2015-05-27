@@ -38,7 +38,7 @@ namespace SurfaceApplication1
             // Add handlers for window availability events
             AddWindowAvailabilityHandlers();
 
-            CanvasController rthttr = new CanvasController(MainCanvas);
+            CanvasController rthttr = new CanvasController(MainCanvas, testText);
         }
 
         /// <summary>

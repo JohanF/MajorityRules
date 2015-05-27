@@ -36,6 +36,7 @@ namespace SurfaceApplication1
         private Ellipse eli;
         private const int InitRadius = 25;  
         private int rotationDampening = 15;
+        private TextBlock testTxt;
 
         public List<IdeaBall> gravityWells;
 
@@ -51,7 +52,7 @@ namespace SurfaceApplication1
             }
         }
 
-        public CanvasController(Canvas MainCanvas)
+        public CanvasController(Canvas MainCanvas, TextBlock test)
         {
             /*
             SolidColorBrush fill = new SolidColorBrush()
@@ -75,6 +76,7 @@ namespace SurfaceApplication1
             this.centerOfGravity = new Point();
             this.centerOfRotation = new Point();
             this.gravityWells = new List<IdeaBall>();
+            this.testTxt = test;
 
             centerOfGravity.X = 1920/2;
             centerOfGravity.Y = 1080/2;
@@ -118,7 +120,6 @@ namespace SurfaceApplication1
             //Debug.WriteLine("----");
             //Debug.WriteLine(deltaTime);
             //Debug.WriteLine(1000/deltaTime);
-
             lastTime = currentTime;
             Random randomGenerator = new Random();
 
@@ -170,6 +171,10 @@ namespace SurfaceApplication1
                         }
                     }
 
+                   
+
+                   
+
                     if (cloxest != null)
                     {
                         ball.Velocity = ball.Velocity + calcGravity(ball.Position.X, ball.Position.Y, (Point)cloxest.Position, gravity);
@@ -179,6 +184,18 @@ namespace SurfaceApplication1
                         ball.Velocity = ball.Velocity + calcGravity(ball.Position.X, ball.Position.Y, centerOfGravity, gravity);
                     }
                 }
+                /*if (ball.IsTouched && (ball.Position.X == ball.lastPos.X && ball.Position.Y == ball.lastPos.Y))
+                {
+                    ball.holdTime = ball.holdTime + deltaTime;
+                }
+                else
+                {
+                    ball.holdTime = 0;
+                }
+                if (ball.IsTouched)
+                {
+                    testTxt.Text = (ball.holdTime).ToString();
+                }*/
                 if (ball.Position.X >= _viewportWidthMax - ball.Radius && ball.Velocity.X > 0) ball.Velocity = new Vector(-ball.Velocity.X, ball.Velocity.Y);
                 if (ball.Position.X <= _viewportWidthMin + ball.Radius && ball.Velocity.X < 0) ball.Velocity = new Vector(-ball.Velocity.X, ball.Velocity.Y);
                 if (ball.Position.Y >= _viewportHeightMax - ball.Radius && ball.Velocity.Y > 0) ball.Velocity = new Vector(ball.Velocity.X, -ball.Velocity.Y);
@@ -207,6 +224,11 @@ namespace SurfaceApplication1
         public void addGravityPoints(IdeaBall b)
         {
             this.gravityWells.Add(b);
+        }
+
+        public void removeGravityPoints(IdeaBall b)
+        {
+            gravityWells.Remove(b);
         }
 
 
