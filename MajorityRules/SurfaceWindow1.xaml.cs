@@ -15,6 +15,8 @@ using Microsoft.Surface;
 using Microsoft.Surface.Presentation;
 using Microsoft.Surface.Presentation.Controls;
 using Microsoft.Surface.Presentation.Input;
+using TinyMessenger;
+using System.Diagnostics;
 
 namespace SurfaceApplication1
 {
@@ -25,7 +27,7 @@ namespace SurfaceApplication1
     {
 
         public int Test { get; set; }
-
+        public static TinyMessengerHub messageHub = new TinyMessengerHub();
 
         /// <summary>
         /// Default constructor.
@@ -34,11 +36,25 @@ namespace SurfaceApplication1
         {
             InitializeComponent();
 
-            
             // Add handlers for window availability events
             AddWindowAvailabilityHandlers();
 
             CanvasController rthttr = new CanvasController(MainCanvas, (int)MainWindow.Width, (int)MainWindow.Height);
+
+            IdeaInput.Visibility = System.Windows.Visibility.Hidden;
+
+            messageHub.Subscribe<MyMessage>((m) =>
+            {
+                Debug.WriteLine("Received");
+                toggleTextBoxHide();
+                rthttr.addBall();
+            }
+            );
+        }
+
+        private void toggleTextBoxHide()
+        {
+            IdeaInput.Visibility = System.Windows.Visibility.Visible;
         }
 
         /// <summary>

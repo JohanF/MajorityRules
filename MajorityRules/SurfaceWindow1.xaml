@@ -16,6 +16,11 @@
         -->
 
         </Canvas>
+        <TextBox Name="IdeaInput"
+                 Width="200"
+                 Height="50"
+                 FontSize="20" MaxHeight="100">
+        </TextBox>
         <s:ScatterView Name="MainScatterView" />
     </Grid>
     

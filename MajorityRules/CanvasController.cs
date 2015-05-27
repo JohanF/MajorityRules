@@ -244,9 +244,11 @@ namespace SurfaceApplication1
                 cosTheta * (pointToRotate.Y - centerPoint.Y) + centerPoint.Y)
             };
         }
-        public void openVirtualKeyBoard()
-        {
 
+        internal void addBall()
+        {
+            Debug.WriteLine("Add Ball");
+            addButtonBall = new ButtonBall(new Vector(random.Next(151, 800), random.Next(0, 600)), new Vector(random.Next(2, 5), random.Next(2, 5)), this._mainCanvas, random.Next(2, 8) * 10, Color.FromArgb(255, 255, 0, 0));
         }
     }
 }

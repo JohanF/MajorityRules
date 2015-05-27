@@ -6,10 +6,11 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Diagnostics;
+using TinyMessenger;
 
 namespace SurfaceApplication1
 {
-    class ButtonBall : IdeaBall
+    public class ButtonBall : IdeaBall
     {
         public ButtonBall(Vector Position, Vector Velocity, Canvas mainCanvas, int rad, Color c) : base(Position, Velocity, mainCanvas, rad, c)
         {
@@ -28,7 +29,7 @@ namespace SurfaceApplication1
             if (isPressingMovement)
             {
                 Debug.WriteLine("Ball pressed2");
-                //CanvasController.openVirtualKeyBoard();
+                SurfaceWindow1.messageHub.Publish(new MyMessage());
             }
         }
     }

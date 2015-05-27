@@ -13,7 +13,7 @@ using System.Windows.Input;
 
 namespace SurfaceApplication1
 {
-    class IdeaBall
+    public class IdeaBall
     {
         private const float Friction = 0.6f;
         private const int InitRadius = 25;
