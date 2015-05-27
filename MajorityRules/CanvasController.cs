@@ -40,6 +40,9 @@ namespace SurfaceApplication1
         private const int InitRadius = 25;  
         private int rotationDampening = 15;
         private List<IdeaBall> gravityWells;
+        private VoteBall yesBall;
+        private VoteBall noBall;
+        private bool votingMode; 
 
         private int _radius;
         private Canvas MainCanvas;
@@ -79,6 +82,7 @@ namespace SurfaceApplication1
             _viewportHeightMax = height;
 
             this.gravityWells = new List<IdeaBall>();
+            this.votingMode = false;
 
             stopWatch.Start();
             lastTime = stopWatch.Elapsed.Milliseconds;
@@ -95,10 +99,12 @@ namespace SurfaceApplication1
 
             theta = 180 / Math.PI;
 
+            
+
             //TODO Get balls from JSON
-            for (int i = 0; i < 8; i++)
+            for (int i = 0; i < 16; i++)
             {
-                ideaBalls.Add(new IdeaBall(new Vector(random.Next(151, 800), random.Next(0, 600)), new Vector(random.Next(2, 5), random.Next(2, 5)), this._mainCanvas, random.Next(2, 8) * 10, Color.FromArgb(255, (byte)random.Next(0, 255), (byte)random.Next(0, 255), (byte)random.Next(0, 255)), this));
+                ideaBalls.Add(new IdeaBall(new Vector(random.Next(151, 800), random.Next(0, 600)), new Vector(random.Next(2, 5), random.Next(2, 5)), this._mainCanvas, random.Next(2, 8) * 10, Color.FromArgb((byte)random.Next(0, 255), (byte)random.Next(0, 255), (byte)random.Next(0, 255), (byte)random.Next(0, 255)), this));
             }
             //items.Add(new IdeaBall(new Vector(100, 100), new Vector(5.1, 5)));
             //items.Add(new IdeaBall(new Vector(500, 500), new Vector(-5, -5)));
@@ -131,6 +137,10 @@ namespace SurfaceApplication1
             dispatchTimer.Start();
 
             MainCanvas.ManipulationDelta += new EventHandler<System.Windows.Input.ManipulationDeltaEventArgs>(MainCanvas_ManipulationDelta);
+            yesBall = new VoteBall(new Vector(0, 0), this, Color.FromArgb(0, 0, 255, 0), 25, true);
+            noBall = new VoteBall(new Vector(0, 0), this, Color.FromArgb(0, 255, 0, 0), 25, false);
+            yesBall.AttachTo(MainCanvas);
+            noBall.AttachTo(MainCanvas);
         }
 
       
@@ -212,6 +222,16 @@ namespace SurfaceApplication1
             foreach (IdeaBall ball in allBalls)
             {
                 ball.DetectCollisions(allBalls);
+                if (this.votingMode)
+                {
+                    if (ball.dontRunHandler)
+                    {
+                        yesBall.position.X = ball.Position.X + ball.Radius + 55;
+                        yesBall.position.Y = ball.Position.Y;
+                        noBall.position.X = ball.Position.X - ball.Radius - 55;
+                        noBall.position.Y = ball.Position.Y;
+                    }
+                }
             }
         }
 
@@ -233,6 +253,9 @@ namespace SurfaceApplication1
             {
                 ball.Draw();
             }
+            yesBall.Draw();
+            noBall.Draw();
+
         }
 
         public void addGravityPoints(IdeaBall b)
@@ -331,6 +354,37 @@ namespace SurfaceApplication1
                 cosTheta * (pointToRotate.Y - centerPoint.Y) + centerPoint.Y)
             };
         }
+
+        public void ballGotClicked(IdeaBall b)
+        {
+            foreach (IdeaBall ball in allBalls)
+            {
+                if (!ball.Equals(b))
+                {
+                    ball.fill.Color = Color.FromArgb(10, ball.fill.Color.R, ball.fill.Color.G, ball.fill.Color.B);
+                    ball.dontRunHandler = false;
+                }
+            }
+            yesBall.fill.Color = Color.FromArgb(123, yesBall.fill.Color.R, yesBall.fill.Color.G, yesBall.fill.Color.B);
+            yesBall.selectedBall = b;
+            noBall.fill.Color = Color.FromArgb(123, noBall.fill.Color.R, noBall.fill.Color.G, noBall.fill.Color.B);
+            noBall.selectedBall = b;
+
+            this.votingMode = true;
+        }
+
+        public void voteGotClicked()
+        {
+            foreach (IdeaBall ball in allBalls)
+            {
+                ball.fill.Color = Color.FromArgb(255, ball.fill.Color.R, ball.fill.Color.G, ball.fill.Color.B);
+                ball.dontRunHandler = true;
+            }
+            yesBall.fill.Color = Color.FromArgb(0, yesBall.fill.Color.R, yesBall.fill.Color.G, yesBall.fill.Color.B);
+            noBall.fill.Color = Color.FromArgb(0, noBall.fill.Color.R, noBall.fill.Color.G, noBall.fill.Color.B);
+            this.votingMode = false;
+        }
+
         public void openVirtualKeyBoard()
         {
 
