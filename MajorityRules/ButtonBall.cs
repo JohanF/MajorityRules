@@ -28,6 +28,7 @@ namespace SurfaceApplication1
             if (isPressingMovement)
             {
                 Debug.WriteLine("Ball pressed2");
+                //CanvasController.openVirtualKeyBoard();
             }
         }
     }

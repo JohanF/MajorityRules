@@ -19,7 +19,8 @@ namespace SurfaceApplication1
     class CanvasController
     {
         private Canvas _mainCanvas;
-        private List<IdeaBall> items = new List<IdeaBall>();
+        private List<IdeaBall> ideaBalls = new List<IdeaBall>();
+        private List<IdeaBall> allBalls = new List<IdeaBall>();
         private ButtonBall addButtonBall;
         private int _viewportWidthMax = 0;
         private int _viewportWidthMin = 0;
@@ -91,9 +92,10 @@ namespace SurfaceApplication1
 
             theta = 180 / Math.PI;
 
+            //TODO Get balls from JSON
             for (int i = 0; i < 8; i++)
             {
-                items.Add(new IdeaBall(new Vector(random.Next(151, 800), random.Next(0, 600)), new Vector(random.Next(2, 5), random.Next(2, 5)), this._mainCanvas, random.Next(2, 8) * 10, Color.FromArgb(255, (byte)random.Next(0, 255), (byte)random.Next(0, 255), (byte)random.Next(0, 255))));
+                ideaBalls.Add(new IdeaBall(new Vector(random.Next(151, 800), random.Next(0, 600)), new Vector(random.Next(2, 5), random.Next(2, 5)), this._mainCanvas, random.Next(2, 8) * 10, Color.FromArgb(255, (byte)random.Next(0, 255), (byte)random.Next(0, 255), (byte)random.Next(0, 255))));
             }
             //items.Add(new IdeaBall(new Vector(100, 100), new Vector(5.1, 5)));
             //items.Add(new IdeaBall(new Vector(500, 500), new Vector(-5, -5)));
@@ -101,11 +103,12 @@ namespace SurfaceApplication1
             //items.Add(new IdeaBall(new Vector(200, 200), new Vector(5, 5)));
             //items.Add(new IdeaBall(new Vector(500, 500), new Vector(-5, -5)));
 
-            //add buttonBall to add new idead
+            //add buttonBall to add new idea
             addButtonBall = new ButtonBall(new Vector(random.Next(151, 800), random.Next(0, 600)), new Vector(random.Next(2, 5), random.Next(2, 5)), this._mainCanvas, random.Next(2, 8) * 10, Color.FromArgb(255, 255, 0, 0));
-            items.Add(addButtonBall);
+            allBalls.AddRange(ideaBalls);
+            allBalls.Add(addButtonBall);
 
-            foreach (IdeaBall ball in items)
+            foreach (IdeaBall ball in allBalls)
             {
                 ball.AttachTo(MainCanvas);
             }
@@ -137,7 +140,7 @@ namespace SurfaceApplication1
             lastTime = currentTime;
             Random randomGenerator = new Random();
 
-            foreach (IdeaBall ball in items)
+            foreach (IdeaBall ball in allBalls)
             {
 
                 ball.Velocity *= 0.99;
@@ -169,16 +172,16 @@ namespace SurfaceApplication1
                 if (ball.Position.Y >= _viewportHeightMax - ball.Radius && ball.Velocity.Y > 0) ball.Velocity = new Vector(ball.Velocity.X, -ball.Velocity.Y);
                 if (ball.Position.Y <= _viewportHeightMin + ball.Radius && ball.Velocity.Y < 0) ball.Velocity = new Vector(ball.Velocity.X, -ball.Velocity.Y);
             }
-            foreach (IdeaBall ball in items)
+            foreach (IdeaBall ball in allBalls)
             {
-                ball.DetectCollisions(items);
+                ball.DetectCollisions(allBalls);
             }
         }
 
         void MainCanvas_ManipulationDelta(object sender, System.Windows.Input.ManipulationDeltaEventArgs e)
         {
             Debug.WriteLine(e.DeltaManipulation.Scale);
-            foreach (IdeaBall ball in items)
+            foreach (IdeaBall ball in allBalls)
             {
                 ball.ApplyScale(e.DeltaManipulation.Scale, e.DeltaManipulation.Translation.Length, e.ManipulationOrigin);
             }
@@ -189,7 +192,7 @@ namespace SurfaceApplication1
 
         private void Update(object sender, EventArgs e)
         {
-            foreach (IdeaBall ball in items)
+            foreach (IdeaBall ball in allBalls)
             {
                 ball.Draw();
             }
@@ -230,19 +233,21 @@ namespace SurfaceApplication1
             double cosTheta = Math.Cos(angleInRadians);
             double sinTheta = Math.Sin(angleInRadians);
             return new Point
-                        {
-            X =
-            (int)
-            (cosTheta * (pointToRotate.X - centerPoint.X) -
-            sinTheta * (pointToRotate.Y - centerPoint.Y) + centerPoint.X),
-            Y =
-            (int)
-            (sinTheta * (pointToRotate.X - centerPoint.X) +
-            cosTheta * (pointToRotate.Y - centerPoint.Y) + centerPoint.Y)
-        };
-}
+            {
+                X =
+                (int)
+                (cosTheta * (pointToRotate.X - centerPoint.X) -
+                sinTheta * (pointToRotate.Y - centerPoint.Y) + centerPoint.X),
+                Y =
+                (int)
+                (sinTheta * (pointToRotate.X - centerPoint.X) +
+                cosTheta * (pointToRotate.Y - centerPoint.Y) + centerPoint.Y)
+            };
+        }
+        public void openVirtualKeyBoard()
+        {
 
-
+        }
     }
 }
 
