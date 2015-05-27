@@ -11,12 +11,13 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Shapes;
 using Microsoft.Surface.Presentation.Controls;
+using Microsoft.Surface.Presentation.Input;
 
 
 
 namespace SurfaceApplication1
 {
-    class CanvasController
+    public class CanvasController
     {
         private Canvas _mainCanvas;
         private List<IdeaBall> ideaBalls = new List<IdeaBall>();
@@ -39,9 +40,14 @@ namespace SurfaceApplication1
         private Ellipse eli;
         private const int InitRadius = 25;  
         private int rotationDampening = 15;
+        private List<IdeaBall> gravityWells;
+        private VoteBall yesBall;
+        private VoteBall noBall;
+        private bool votingMode; 
 
         private int _radius;
         private Canvas MainCanvas;
+        private bool addBallClicked;
         private int Radius
         {
             get { return _radius; }
@@ -77,6 +83,9 @@ namespace SurfaceApplication1
             _viewportWidthMax = width;
             _viewportHeightMax = height;
 
+            this.gravityWells = new List<IdeaBall>();
+            this.votingMode = false;
+
             stopWatch.Start();
             lastTime = stopWatch.Elapsed.Milliseconds;
             // TODO: Complete member initialization
@@ -92,10 +101,12 @@ namespace SurfaceApplication1
 
             theta = 180 / Math.PI;
 
+            
+
             //TODO Get balls from JSON
-            for (int i = 0; i < 8; i++)
+            for (int i = 0; i < 1; i++)
             {
-                ideaBalls.Add(new IdeaBall(new Vector(random.Next(151, 800), random.Next(0, 600)), new Vector(random.Next(2, 5), random.Next(2, 5)), this._mainCanvas, random.Next(2, 8) * 10, Color.FromArgb(255, (byte)random.Next(0, 255), (byte)random.Next(0, 255), (byte)random.Next(0, 255))));
+                ideaBalls.Add(new IdeaBall(new Vector(random.Next(151, 800), random.Next(0, 600)), new Vector(random.Next(2, 5), random.Next(2, 5)), this._mainCanvas, random.Next(2, 8) * 10, Color.FromArgb((byte)random.Next(100, 255), (byte)random.Next(0, 255), (byte)random.Next(0, 255), (byte)random.Next(0, 255)), this, "hej"));
             }
             //items.Add(new IdeaBall(new Vector(100, 100), new Vector(5.1, 5)));
             //items.Add(new IdeaBall(new Vector(500, 500), new Vector(-5, -5)));
@@ -104,7 +115,7 @@ namespace SurfaceApplication1
             //items.Add(new IdeaBall(new Vector(500, 500), new Vector(-5, -5)));
 
             //add buttonBall to add new idea
-            addButtonBall = new ButtonBall(new Vector(random.Next(151, 800), random.Next(0, 600)), new Vector(random.Next(2, 5), random.Next(2, 5)), this._mainCanvas, random.Next(2, 8) * 10, Color.FromArgb(255, 255, 0, 0));
+            addButtonBall = new ButtonBall(new Vector(random.Next(151, 800), random.Next(0, 600)), new Vector(random.Next(2, 5), random.Next(2, 5)), this._mainCanvas, random.Next(2, 8) * 10, Color.FromArgb(255, 255, 0, 0), this, "Add new Idea");
             allBalls.AddRange(ideaBalls);
             allBalls.Add(addButtonBall);
 
@@ -128,9 +139,22 @@ namespace SurfaceApplication1
             dispatchTimer.Start();
 
             MainCanvas.ManipulationDelta += new EventHandler<System.Windows.Input.ManipulationDeltaEventArgs>(MainCanvas_ManipulationDelta);
+            yesBall = new VoteBall(new Vector(0, 0), this, Color.FromArgb(0, 0, 255, 0), 25, true);
+            noBall = new VoteBall(new Vector(0, 0), this, Color.FromArgb(0, 255, 0, 0), 25, false);
+            yesBall.AttachTo(MainCanvas);
+            noBall.AttachTo(MainCanvas);
+
+            //this._mainCanvas.AddHandler(TouchExtensions.TapGestureEvent, new RoutedEventHandler(Canvas_TapGestureEvent));
+       
         }
 
-      
+        //protected virtual void Canvas_TapGestureEvent(object sender, RoutedEventArgs e)
+        //{
+        //    if(addButtonBall.Clicked){
+        //        SurfaceWindow1.messageHub.Publish(new DismissTextboxEvent());
+        //        addButtonBall.Clicked = false;
+        //    }
+        //}
 
         void BackgroundUpdate(object sender, ElapsedEventArgs e)
         {
@@ -165,16 +189,60 @@ namespace SurfaceApplication1
                 }
 
 
-                ball.Velocity = ball.Velocity * 0.85;
-                if (!ball.IsTouched) ball.Velocity = ball.Velocity + calcGravity(ball.Position.X, ball.Position.Y, centerOfGravity, gravity);
+                ball.Velocity = ball.Velocity * 0.95; 
+                if (!ball.IsTouched && ball.affectedByGravity)
+                {
+
+                    IdeaBall cloxest = null;
+
+                    foreach (IdeaBall ib in gravityWells)
+                    {
+                        if (inGravityRange(ib, ball))
+                        {
+                            if (cloxest != null)
+                            {
+                                if ((gravDist(ib, ball) < gravDist(cloxest, ball))) cloxest = ib;
+                            }
+                            else
+                            {
+                                cloxest = ib;
+                            }
+                        }
+                    }
+
+
+
+
+
+                    if (cloxest != null)
+                    {
+                        ball.Velocity = ball.Velocity + calcGravity(ball.Position.X, ball.Position.Y, (Point)cloxest.Position, gravity, cloxest);
+                    }
+                    else
+                    {
+                        ball.Velocity = ball.Velocity + calcGravity(ball.Position.X, ball.Position.Y, centerOfGravity, gravity, null);
+                    }
+                }
                 if (ball.Position.X >= _viewportWidthMax - ball.Radius && ball.Velocity.X > 0) ball.Velocity = new Vector(-ball.Velocity.X, ball.Velocity.Y);
                 if (ball.Position.X <= _viewportWidthMin + ball.Radius && ball.Velocity.X < 0) ball.Velocity = new Vector(-ball.Velocity.X, ball.Velocity.Y);
                 if (ball.Position.Y >= _viewportHeightMax - ball.Radius && ball.Velocity.Y > 0) ball.Velocity = new Vector(ball.Velocity.X, -ball.Velocity.Y);
                 if (ball.Position.Y <= _viewportHeightMin + ball.Radius && ball.Velocity.Y < 0) ball.Velocity = new Vector(ball.Velocity.X, -ball.Velocity.Y);
+                if (!ball.affectedByGravity && !ball.IsTouched) ball.Position = ball.gravPosition;
+
             }
             foreach (IdeaBall ball in allBalls)
             {
                 ball.DetectCollisions(allBalls);
+                if (this.votingMode)
+                {
+                    if (ball.dontRunHandler)
+                    {
+                        yesBall.position.X = ball.Position.X + ball.Radius + 55;
+                        yesBall.position.Y = ball.Position.Y;
+                        noBall.position.X = ball.Position.X - ball.Radius - 55;
+                        noBall.position.Y = ball.Position.Y;
+                    }
+                }
             }
         }
 
@@ -196,28 +264,55 @@ namespace SurfaceApplication1
             {
                 ball.Draw();
             }
+            yesBall.Draw();
+            noBall.Draw();
+
         }
 
-        private Vector calcGravity(double vX, double vY, Point attractor, double G)
+        public void addGravityPoints(IdeaBall b)
+        {
+            this.gravityWells.Add(b);
+        }
+
+        public void removeGravityPoints(IdeaBall b)
+        {
+            gravityWells.Remove(b);
+        }
+
+
+        private Vector calcGravity(double vX, double vY, Point attractor, double G, IdeaBall b)
         {
 
             double dY = vY - attractor.Y;
             double dX = vX - attractor.X;
-
+            int safeZoneY = 150;
+            int safeZoneX = 150;
 
 
             Vector newGravVelocity = new Vector();
 
-            if (Math.Abs(dY) < 250 && Math.Abs(dX) < 250) return newGravVelocity;
+            if (attractor != centerOfGravity)
+            {
+                safeZoneY = b.Radius +35;
+                safeZoneX = b.Radius +35;
+            }
+
+
+            if (Math.Abs(dY) < safeZoneY && Math.Abs(dX) < safeZoneX) return newGravVelocity;
 
             double angleInDegrees = Math.Atan2(dY, dX) * 180 / Math.PI;
 
             //b.Text = System.Convert.ToString("Cos = " + Math.Cos(angleInDegrees) + "Sin = " + Math.Sin(angleInDegrees));
 
-            if (Math.Abs(dY) < 1)
+            if (Math.Abs(dY) < 3 && dX < 0)
             {
                 newGravVelocity.X = G;
-            } else
+            }
+            else if (Math.Abs(dY) < 3 && dX > 0)
+            {
+                newGravVelocity.X = -G;
+            }
+            else
             {
                 newGravVelocity.X = G * (Math.Cos(angleInDegrees));
                 newGravVelocity.Y = G * (Math.Sin(angleInDegrees));
@@ -225,6 +320,32 @@ namespace SurfaceApplication1
 
             return newGravVelocity;
 
+        }
+
+        private static bool inGravityRange(IdeaBall a, IdeaBall b)
+        {
+            double dX = a.Position.X - b.Position.X;
+            double dY = a.Position.Y - b.Position.Y;
+
+            double gravRadius = a.Radius * 2 + b.Radius;
+            double sqrRadius = gravRadius * gravRadius;
+
+            double distSqr = (dX * dX) + (dY * dY);
+
+            if (distSqr <= sqrRadius)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        private double gravDist(IdeaBall a, IdeaBall b)
+        {
+            double dX = a.Position.X - b.Position.X;
+            double dY = a.Position.Y - b.Position.Y;
+            double distSqr = (dX * dX) + (dY * dY);
+            return distSqr;
         }
 
         static Point RotatePoint(Point pointToRotate, Point centerPoint, double angleInDegrees)
@@ -245,10 +366,60 @@ namespace SurfaceApplication1
             };
         }
 
-        internal void addBall()
+        public void votingInitiated(IdeaBall b)
         {
+            if (!votingMode)
+            {
+                foreach (IdeaBall ball in allBalls)
+                {
+                    if (!ball.Equals(b))
+                    {
+                        int x = ball.fill.Color.A / 10;
+                        ball.fill.Color = Color.FromArgb((byte)x, ball.fill.Color.R, ball.fill.Color.G, ball.fill.Color.B);
+                        ball.dontRunHandler = false;
+                    }
+                }
+                yesBall.fill.Color = Color.FromArgb(123, yesBall.fill.Color.R, yesBall.fill.Color.G, yesBall.fill.Color.B);
+                yesBall.selectedBall = b;
+                yesBall.ballClicked = true;
+                Canvas.SetZIndex(yesBall.Ellipse, this._mainCanvas.Children.Count-1);
+                noBall.fill.Color = Color.FromArgb(123, noBall.fill.Color.R, noBall.fill.Color.G, noBall.fill.Color.B);
+                noBall.selectedBall = b;
+                noBall.ballClicked = true;
+                Canvas.SetZIndex(noBall.Ellipse, this._mainCanvas.Children.Count);
+
+                this.votingMode = true;
+            }
+        }
+
+        public void voteGotClicked(IdeaBall b)
+        {
+            foreach (IdeaBall ball in allBalls)
+            {
+                if (ball != b)
+                {
+                    int x = ball.fill.Color.A * 10;
+                    ball.fill.Color = Color.FromArgb((byte)x, ball.fill.Color.R, ball.fill.Color.G, ball.fill.Color.B);
+                    ball.dontRunHandler = true;
+                }
+            }
+            yesBall.fill.Color = Color.FromArgb(0, yesBall.fill.Color.R, yesBall.fill.Color.G, yesBall.fill.Color.B);
+            yesBall.ballClicked = false;
+            noBall.fill.Color = Color.FromArgb(0, noBall.fill.Color.R, noBall.fill.Color.G, noBall.fill.Color.B);
+            noBall.ballClicked = false;
+            this.votingMode = false;
+        }
+
+
+
+        internal void AddBall(string text)
+        {
+            addButtonBall.Clicked = false;
             Debug.WriteLine("Add Ball");
-            addButtonBall = new ButtonBall(new Vector(random.Next(151, 800), random.Next(0, 600)), new Vector(random.Next(2, 5), random.Next(2, 5)), this._mainCanvas, random.Next(2, 8) * 10, Color.FromArgb(255, 255, 0, 0));
+            IdeaBall ideaBall = new IdeaBall(new Vector(random.Next(151, 800), random.Next(0, 600)), new Vector(random.Next(2, 5), random.Next(2, 5)), this._mainCanvas, 4 * 10, Color.FromArgb((byte)random.Next(100, 255), (byte)random.Next(0, 255), (byte)random.Next(0, 255), (byte)random.Next(0, 255)), this, text);
+            ideaBalls.Add(ideaBall);
+            ideaBall.AttachTo(this._mainCanvas);
+            allBalls.Add(ideaBall);
         }
     }
 }

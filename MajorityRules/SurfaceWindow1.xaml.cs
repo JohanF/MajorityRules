@@ -29,6 +29,8 @@ namespace SurfaceApplication1
         public int Test { get; set; }
         public static TinyMessengerHub messageHub = new TinyMessengerHub();
 
+        private CanvasController canvasController;
+
         /// <summary>
         /// Default constructor.
         /// </summary>
@@ -39,22 +41,48 @@ namespace SurfaceApplication1
             // Add handlers for window availability events
             AddWindowAvailabilityHandlers();
 
-            CanvasController rthttr = new CanvasController(MainCanvas, (int)MainWindow.Width, (int)MainWindow.Height);
+            canvasController = new CanvasController(MainCanvas, (int)MainWindow.Width, (int)MainWindow.Height);
 
             IdeaInput.Visibility = System.Windows.Visibility.Hidden;
+            IdeaInput.KeyUp += new KeyEventHandler(IdeaInput_KeyUp);
 
-            messageHub.Subscribe<MyMessage>((m) =>
+            messageHub.Subscribe<NewIdeaEvent>((m) =>
             {
                 Debug.WriteLine("Received");
                 toggleTextBoxHide();
-                rthttr.addBall();
             }
             );
+
+            messageHub.Subscribe<DismissTextboxEvent>((m) =>
+            {
+                Debug.WriteLine("Dismiss textbox");
+                IdeaInput.Visibility = Visibility.Hidden;
+            }
+            );
+        }
+
+        void IdeaInput_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter && IdeaInput.Text != "" && IdeaInput.Text != null)
+            {
+                canvasController.AddBall(IdeaInput.Text);
+                IdeaInput.Text = "";
+                IdeaInput.Visibility = Visibility.Hidden;
+            }
+            else if (e.Key == Key.Escape)
+            {
+                IdeaInput.Text = "";
+                IdeaInput.Visibility = Visibility.Hidden;
+            }
         }
 
         private void toggleTextBoxHide()
         {
             IdeaInput.Visibility = System.Windows.Visibility.Visible;
+            if (!IdeaInput.IsKeyboardFocused)
+            {
+                Keyboard.Focus(IdeaInput);
+            }
         }
 
         /// <summary>

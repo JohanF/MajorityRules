@@ -19,7 +19,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
+    <Optimize>true</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
@@ -62,6 +62,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Events.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="MyMessage.cs" />
     <Compile Include="TinyMessenger.cs" />
@@ -75,6 +76,7 @@
     </Compile>
     <Compile Include="CanvasController.cs" />
     <Compile Include="ButtonBall.cs" />
+    <Compile Include="VoteBall.cs" />
     <Compile Include="IdeaBall.cs" />
     <Compile Include="SurfaceCanvas.cs" />
     <Compile Include="SurfaceWindow1.xaml.cs">
