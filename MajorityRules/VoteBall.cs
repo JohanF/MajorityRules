@@ -61,7 +61,7 @@ namespace SurfaceApplication1
                 selectedBall.Radius -= 3;
             }
 
-            CanvasCtrl.voteGotClicked();
+            CanvasCtrl.voteGotClicked(selectedBall);
 
         }
 

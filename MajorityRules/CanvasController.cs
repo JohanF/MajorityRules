@@ -282,8 +282,8 @@ namespace SurfaceApplication1
 
             if (attractor != centerOfGravity)
             {
-                safeZoneY = b.Radius +25;
-                safeZoneX = b.Radius +25;
+                safeZoneY = b.Radius +35;
+                safeZoneX = b.Radius +35;
             }
 
 
@@ -361,7 +361,8 @@ namespace SurfaceApplication1
             {
                 if (!ball.Equals(b))
                 {
-                    ball.fill.Color = Color.FromArgb(10, ball.fill.Color.R, ball.fill.Color.G, ball.fill.Color.B);
+                    int x = ball.fill.Color.A / 10;
+                    ball.fill.Color = Color.FromArgb((byte) x, ball.fill.Color.R, ball.fill.Color.G, ball.fill.Color.B);
                     ball.dontRunHandler = false;
                 }
             }
@@ -373,12 +374,16 @@ namespace SurfaceApplication1
             this.votingMode = true;
         }
 
-        public void voteGotClicked()
+        public void voteGotClicked(IdeaBall b)
         {
             foreach (IdeaBall ball in allBalls)
             {
-                ball.fill.Color = Color.FromArgb(255, ball.fill.Color.R, ball.fill.Color.G, ball.fill.Color.B);
-                ball.dontRunHandler = true;
+                if (ball != b)
+                {
+                    int x = ball.fill.Color.A * 10;
+                    ball.fill.Color = Color.FromArgb((byte)x, ball.fill.Color.R, ball.fill.Color.G, ball.fill.Color.B);
+                    ball.dontRunHandler = true;
+                }
             }
             yesBall.fill.Color = Color.FromArgb(0, yesBall.fill.Color.R, yesBall.fill.Color.G, yesBall.fill.Color.B);
             noBall.fill.Color = Color.FromArgb(0, noBall.fill.Color.R, noBall.fill.Color.G, noBall.fill.Color.B);
