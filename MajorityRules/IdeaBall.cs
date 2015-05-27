@@ -10,6 +10,7 @@ using System.Windows;
 using System.Diagnostics;
 using Microsoft.Surface.Presentation.Input;
 using System.Windows.Input;
+using System.Timers;
 
 namespace SurfaceApplication1
 {
@@ -27,10 +28,16 @@ namespace SurfaceApplication1
         protected double deltaX;
         protected double deltaY;
         protected Boolean isPressingMovement;
+        private const int holdTime = 10;
+        System.Timers.Timer timer = new System.Timers.Timer();
+        private int timerReset;
+        private CanvasController CanvasCtrl;
 
+        public Vector gravPosition { get; set; }
         public Vector Position { get; set; }
         public Vector Velocity { get; set; }
         public bool IsTouched { get; set; }
+        public bool affectedByGravity { get; set; }
 
         private double _scale = 1;
         public double Scale
@@ -56,7 +63,7 @@ namespace SurfaceApplication1
 
 
 
-        public IdeaBall(Vector Position, Vector Velocity, Canvas mainCanvas, int rad, Color c)
+        public IdeaBall(Vector Position, Vector Velocity, Canvas mainCanvas, int rad, Color c, CanvasController CC)
         {
             random = new Random();
             SolidColorBrush fill = new SolidColorBrush()
@@ -68,6 +75,9 @@ namespace SurfaceApplication1
             this.Position = Position;
             this.mainCanvas = mainCanvas;
             this.IsTouched = false;
+            this.timerReset = 0;
+            this.affectedByGravity = true;
+            this.CanvasCtrl = CC;
 
 
             Ellipse = new Ellipse()
@@ -86,9 +96,28 @@ namespace SurfaceApplication1
 
             Radius = rad;
 
+            timer.Elapsed += new ElapsedEventHandler(Ellipse_HoldGestureEvent);
+            timer.Interval = 2000;
+
             Ellipse.TouchDown += new System.EventHandler<System.Windows.Input.TouchEventArgs>(Ellipse_TouchDown);
             Ellipse.TouchMove += new System.EventHandler<System.Windows.Input.TouchEventArgs>(Ellipse_TouchMove);
             Ellipse.TouchLeave += new System.EventHandler<System.Windows.Input.TouchEventArgs>(Ellipse_TouchLeave);
+        }
+
+        void Ellipse_HoldGestureEvent(object sender, ElapsedEventArgs e)
+        {
+            if (this.affectedByGravity)
+            {
+                this.gravPosition = this.Position;
+                this.affectedByGravity = false;
+                CanvasCtrl.addGravityPoints(this);
+            }
+            else
+            {
+                this.affectedByGravity = true;
+                CanvasCtrl.removeGravityPoints(this);
+            }
+            
         }
 
         protected virtual void Ellipse_TouchLeave(object sender, System.Windows.Input.TouchEventArgs e)
@@ -98,7 +127,7 @@ namespace SurfaceApplication1
             {
                 // Forget about this contact.
                 ellipseControlTouchDevice = null;
-                this.Velocity = new Vector(deltaX*5, deltaY*5);
+                if(!this.affectedByGravity) this.Velocity = new Vector(deltaX*5, deltaY*5);
                 this.IsTouched = false;
             }
             releasePoint = e.TouchDevice.GetTouchPoint(this.mainCanvas).Position;
@@ -113,8 +142,10 @@ namespace SurfaceApplication1
                 isPressingMovement = false;
             }
 
+            timer.Stop();
+            
             // Mark this event as handled.  
-            e.Handled = true;
+            // e.Handled = true;
         }
 
         void Ellipse_TouchMove(object sender, System.Windows.Input.TouchEventArgs e)
@@ -122,22 +153,35 @@ namespace SurfaceApplication1
 
             if (e.TouchDevice == ellipseControlTouchDevice)
             {
-                // Get the current position of the contact.  
-                Point currentTouchPoint = ellipseControlTouchDevice.GetCenterPosition(this.mainCanvas);
-                    
-                // Get the change between the controlling contact point and
-                // the changed contact point.  
-                deltaX = currentTouchPoint.X - lastPoint.X;
-                deltaY = currentTouchPoint.Y - lastPoint.Y;
+                if (timerReset == 10)
+                {
+                    timer.Stop();
+                    timer.Start();
+                    timerReset = 0;
+                }
 
-                // Get and then set a new top position and a new left position for the ellipse. 
-                this.Position = new Vector(this.Position.X + (int)deltaX, this.Position.Y + (int)deltaY);
+                timerReset++;
+                
+                    // Get the current position of the contact.  
+                    Point currentTouchPoint = ellipseControlTouchDevice.GetCenterPosition(this.mainCanvas);
 
-                // Forget the old contact point, and remember the new contact point.  
-                lastPoint = currentTouchPoint;
+                    // Get the change between the controlling contact point and
+                    // the changed contact point.  
+                    deltaX = currentTouchPoint.X - lastPoint.X;
+                    deltaY = currentTouchPoint.Y - lastPoint.Y;
 
-                // Mark this event as handled.  
-                e.Handled = true;
+                    // Get and then set a new top position and a new left position for the ellipse. 
+                    this.Position = new Vector(this.Position.X + (int)deltaX, this.Position.Y + (int)deltaY);
+
+                    // Forget the old contact point, and remember the new contact point.  
+                    lastPoint = currentTouchPoint;
+
+                    // Mark this event as handled.  
+                    // e.Handled = true;
+               if (!this.affectedByGravity)
+                    {
+                    this.gravPosition = this.Position;
+                    }
             }
         }
 
@@ -150,7 +194,7 @@ namespace SurfaceApplication1
 
             // Capture to the ellipse.  
             e.TouchDevice.Capture(sender as Ellipse);
-
+            timer.Start();
             this.IsTouched = true;
 
             // Remember this contact if a contact has not been remembered already.  
@@ -166,7 +210,7 @@ namespace SurfaceApplication1
             enterTouchPoint = ellipseControlTouchDevice.GetTouchPoint(this.mainCanvas).Position;
 
             // Mark this event as handled.  
-            e.Handled = true;
+            // e.Handled = true;
 
         }
 
@@ -244,8 +288,8 @@ namespace SurfaceApplication1
                 double im2 = 1.0 / b.Radius;
 
                 // push-pull them apart based off their mass
-                a.Position = a.Position + (mtd * (im1 / (im1 + im2))) + adjustment;
-                b.Position = b.Position - (mtd * (im2 / (im1 + im2))) - adjustment;
+                if (a.affectedByGravity) a.Position = a.Position + (mtd * (im1 / (im1 + im2))) + adjustment;
+                if (b.affectedByGravity) b.Position = b.Position - (mtd * (im2 / (im1 + im2))) - adjustment;
 
 
 

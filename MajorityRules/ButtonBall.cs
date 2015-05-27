@@ -11,7 +11,7 @@ namespace SurfaceApplication1
 {
     class ButtonBall : IdeaBall
     {
-        public ButtonBall(Vector Position, Vector Velocity, Canvas mainCanvas, int rad, Color c) : base(Position, Velocity, mainCanvas, rad, c)
+        public ButtonBall(Vector Position, Vector Velocity, Canvas mainCanvas, int rad, Color c, CanvasController CC) : base(Position, Velocity, mainCanvas, rad, c, CC)
         {
             Title.Text = "Add new Idea";
             Debug.WriteLine("Ball button created");
