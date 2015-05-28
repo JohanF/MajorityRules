@@ -12,17 +12,24 @@ namespace SurfaceApplication1
 {
     public class ButtonBall : IdeaBall
     {
+        private CanvasController CanvasCtrl;
         public ButtonBall(Vector Position, Vector Velocity, Canvas mainCanvas, int rad, Color c, CanvasController CC, String text) : base(Position, Velocity, mainCanvas, rad, c, CC, text)
         {
             Title.Text = "Add new Idea";
             Debug.WriteLine("Ball button created");
+            this.CanvasCtrl = CC;
         }
 
         protected override void Ellipse_TapGestureEvent(object sender, RoutedEventArgs e)
         {
-            Clicked = true;
-            Debug.WriteLine("Ball pressed2");
-            SurfaceWindow1.messageHub.Publish(new NewIdeaEvent());
+            if (runHandler)
+            {
+
+                CanvasCtrl.disableNonFocusedBalls(this);
+                Clicked = true;
+                Debug.WriteLine("Ball pressed2");
+                SurfaceWindow1.messageHub.Publish(new NewIdeaEvent());
+            }
         }
 
         //protected override void Ellipse_TouchLeave(object sender, System.Windows.Input.TouchEventArgs e)

@@ -41,7 +41,7 @@ namespace SurfaceApplication1
         public Vector Velocity { get; set; }
         public bool IsTouched { get; set; }
         public bool affectedByGravity { get; set; }
-        public bool dontRunHandler { get; set; }
+        public bool runHandler { get; set; }
 
         private double _scale = 1;
         public double Scale
@@ -82,7 +82,7 @@ namespace SurfaceApplication1
             this.timerReset = 0;
             this.affectedByGravity = true;
             this.CanvasCtrl = CC;
-            this.dontRunHandler = true;
+            this.runHandler = true;
             this.text = text;
 
 
@@ -116,7 +116,7 @@ namespace SurfaceApplication1
         protected virtual void Ellipse_TapGestureEvent(object sender, RoutedEventArgs e)
         {
             
-            if (dontRunHandler)
+            if (runHandler)
             {
                 CanvasCtrl.votingInitiated(this);
                 //this.Radius = this.Radius + 3;
@@ -125,7 +125,7 @@ namespace SurfaceApplication1
 
         void Ellipse_HoldGestureEvent(object sender, ElapsedEventArgs e)
         {
-            if (dontRunHandler)
+            if (runHandler)
             {
                 if (this.affectedByGravity)
                 {
@@ -143,7 +143,7 @@ namespace SurfaceApplication1
 
         protected virtual void Ellipse_TouchLeave(object sender, System.Windows.Input.TouchEventArgs e)
         {
-            if (dontRunHandler)
+            if (runHandler)
             {
                 // If this contact is the one that was remembered
                 if (e.TouchDevice == ellipseControlTouchDevice)
@@ -174,7 +174,7 @@ namespace SurfaceApplication1
 
         void Ellipse_TouchMove(object sender, System.Windows.Input.TouchEventArgs e)
         {
-            if (dontRunHandler)
+            if (runHandler)
             {
                 if (e.TouchDevice == ellipseControlTouchDevice)
                 {
@@ -213,7 +213,7 @@ namespace SurfaceApplication1
 
         void Ellipse_TouchDown(object sender, System.Windows.Input.TouchEventArgs e)
         {
-            if (dontRunHandler)
+            if (runHandler)
             {
                 /*
                 this.Vx = 0;

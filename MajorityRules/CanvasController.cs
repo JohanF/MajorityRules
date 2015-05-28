@@ -32,7 +32,7 @@ namespace SurfaceApplication1
         private Stopwatch stopWatch = new Stopwatch();
         private int lastTime;
         private int deltaTime;
-        private double gravity = 2.5;
+        private double gravity = 1.5;
         private double rotation = 0;
         private Point centerOfGravity;
         private Point centerOfRotation;
@@ -48,6 +48,8 @@ namespace SurfaceApplication1
         private int _radius;
         private Canvas MainCanvas;
         private bool addBallClicked;
+        private int safeZoneY;
+        private int safeZoneX;
         private int Radius
         {
             get { return _radius; }
@@ -98,6 +100,10 @@ namespace SurfaceApplication1
 
             centerOfRotation.X = width / 2;
             centerOfRotation.Y = height / 2 + 100;
+
+
+            safeZoneY = 50;
+            safeZoneX = 50;
 
             theta = 180 / Math.PI;
 
@@ -235,7 +241,7 @@ namespace SurfaceApplication1
                 ball.DetectCollisions(allBalls);
                 if (this.votingMode)
                 {
-                    if (ball.dontRunHandler)
+                    if (ball.runHandler)
                     {
                         yesBall.position.X = ball.Position.X + ball.Radius + 55;
                         yesBall.position.Y = ball.Position.Y;
@@ -285,20 +291,13 @@ namespace SurfaceApplication1
 
             double dY = vY - attractor.Y;
             double dX = vX - attractor.X;
-            int safeZoneY = 150;
-            int safeZoneX = 150;
 
 
             Vector newGravVelocity = new Vector();
 
-            if (attractor != centerOfGravity)
-            {
-                safeZoneY = b.Radius +35;
-                safeZoneX = b.Radius +35;
-            }
+           
 
 
-            if (Math.Abs(dY) < safeZoneY && Math.Abs(dX) < safeZoneX) return newGravVelocity;
 
             double angleInDegrees = Math.Atan2(dY, dX) * 180 / Math.PI;
 
@@ -312,10 +311,44 @@ namespace SurfaceApplication1
             {
                 newGravVelocity.X = -G;
             }
+            else if (Math.Abs(dX) < 3 && dY > 0)
+            {
+                newGravVelocity.Y = -G;
+            }
+            else if (Math.Abs(dX) < 3 && dY > 0)
+            {
+                newGravVelocity.Y = -G;
+            }
             else
             {
-                newGravVelocity.X = G * (Math.Cos(angleInDegrees));
-                newGravVelocity.Y = G * (Math.Sin(angleInDegrees));
+                if (attractor != centerOfGravity)
+                {
+                    if (Math.Abs(dY) < (b.Radius + 30) && Math.Abs(dX) < (b.Radius + 30))
+                    {
+                        newGravVelocity.X = G * (Math.Cos(angleInDegrees))*0.1;
+                        newGravVelocity.Y = G * (Math.Sin(angleInDegrees))*0.1;
+                    }
+                    else
+                    {
+
+                        newGravVelocity.X = G * (Math.Cos(angleInDegrees));
+                        newGravVelocity.Y = G * (Math.Sin(angleInDegrees));
+                    }
+                }
+                else
+                {
+                    if (Math.Abs(dY) < safeZoneY && Math.Abs(dX) < safeZoneX)
+                    {
+                        newGravVelocity.X = G * (Math.Cos(angleInDegrees)) * 0.1;
+                        newGravVelocity.Y = G * (Math.Sin(angleInDegrees)) * 0.1;
+                    }
+                    else
+                    {
+
+                        newGravVelocity.X = G * (Math.Cos(angleInDegrees));
+                        newGravVelocity.Y = G * (Math.Sin(angleInDegrees));
+                    }
+                }
             }
 
             return newGravVelocity;
@@ -370,15 +403,7 @@ namespace SurfaceApplication1
         {
             if (!votingMode)
             {
-                foreach (IdeaBall ball in allBalls)
-                {
-                    if (!ball.Equals(b))
-                    {
-                        int x = ball.fill.Color.A / 10;
-                        ball.fill.Color = Color.FromArgb((byte)x, ball.fill.Color.R, ball.fill.Color.G, ball.fill.Color.B);
-                        ball.dontRunHandler = false;
-                    }
-                }
+                disableNonFocusedBalls(b);
                 yesBall.fill.Color = Color.FromArgb(123, yesBall.fill.Color.R, yesBall.fill.Color.G, yesBall.fill.Color.B);
                 yesBall.selectedBall = b;
                 yesBall.ballClicked = true;
@@ -392,7 +417,21 @@ namespace SurfaceApplication1
             }
         }
 
-        public void voteGotClicked(IdeaBall b)
+        public void disableNonFocusedBalls(IdeaBall b)
+        {
+            foreach (IdeaBall ball in allBalls)
+            {
+                if (!ball.Equals(b))
+                {
+                    int x = ball.fill.Color.A / 10;
+                    ball.fill.Color = Color.FromArgb((byte)x, ball.fill.Color.R, ball.fill.Color.G, ball.fill.Color.B);
+                    ball.runHandler = false;
+
+                }
+            }
+        }
+
+        public void enableNonFocusedBalls(IdeaBall b)
         {
             foreach (IdeaBall ball in allBalls)
             {
@@ -400,9 +439,16 @@ namespace SurfaceApplication1
                 {
                     int x = ball.fill.Color.A * 10;
                     ball.fill.Color = Color.FromArgb((byte)x, ball.fill.Color.R, ball.fill.Color.G, ball.fill.Color.B);
-                    ball.dontRunHandler = true;
+                    ball.runHandler = true;
                 }
             }
+        }
+
+        public void voteGotClicked(IdeaBall b, int safeZoneTransform)
+        {
+            enableNonFocusedBalls(b);
+            safeZoneX += safeZoneTransform;
+            safeZoneY += safeZoneTransform;
             yesBall.fill.Color = Color.FromArgb(0, yesBall.fill.Color.R, yesBall.fill.Color.G, yesBall.fill.Color.B);
             yesBall.ballClicked = false;
             noBall.fill.Color = Color.FromArgb(0, noBall.fill.Color.R, noBall.fill.Color.G, noBall.fill.Color.B);
@@ -415,8 +461,11 @@ namespace SurfaceApplication1
         internal void AddBall(string text)
         {
             addButtonBall.Clicked = false;
+            enableNonFocusedBalls(addButtonBall);
             Debug.WriteLine("Add Ball");
             IdeaBall ideaBall = new IdeaBall(new Vector(random.Next(151, 800), random.Next(0, 600)), new Vector(random.Next(2, 5), random.Next(2, 5)), this._mainCanvas, 4 * 10, Color.FromArgb((byte)random.Next(100, 255), (byte)random.Next(0, 255), (byte)random.Next(0, 255), (byte)random.Next(0, 255)), this, text);
+            safeZoneX += 10;
+            safeZoneY += 10;
             ideaBalls.Add(ideaBall);
             ideaBall.AttachTo(this._mainCanvas);
             allBalls.Add(ideaBall);

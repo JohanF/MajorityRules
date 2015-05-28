@@ -20,6 +20,7 @@ namespace SurfaceApplication1
         public SolidColorBrush fill;
         private bool yes;
         public bool ballClicked;
+        private int safeZoneT;
 
         public Ellipse Ellipse { get; private set; }
         public IdeaBall selectedBall { get; set; }
@@ -45,6 +46,7 @@ namespace SurfaceApplication1
             this.yes = yn;
             this.selectedBall = null;
             this.ballClicked = false;
+            this.safeZoneT = 0;
 
             Ellipse = new Ellipse()
             {
@@ -61,13 +63,16 @@ namespace SurfaceApplication1
                 if (yes)
                 {
                     selectedBall.Radius += 3;
+                    safeZoneT = 3;
+
                 }
                 else
                 {
                     selectedBall.Radius -= 3;
+                    safeZoneT = -3;
                 }
 
-                CanvasCtrl.voteGotClicked(selectedBall);
+                CanvasCtrl.voteGotClicked(selectedBall, safeZoneT);
             }
         }
 
