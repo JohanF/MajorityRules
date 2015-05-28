@@ -144,7 +144,7 @@ namespace SurfaceApplication1
             dispatchTimer.Tick += new EventHandler(Update);
             dispatchTimer.Start();
 
-            MainCanvas.ManipulationDelta += new EventHandler<System.Windows.Input.ManipulationDeltaEventArgs>(MainCanvas_ManipulationDelta);
+           // MainCanvas.ManipulationDelta += new EventHandler<System.Windows.Input.ManipulationDeltaEventArgs>(MainCanvas_ManipulationDelta);
             yesBall = new VoteBall(new Vector(0, 0), this, Color.FromArgb(0, 0, 255, 0), 25, true);
             noBall = new VoteBall(new Vector(0, 0), this, Color.FromArgb(0, 255, 0, 0), 25, false);
             yesBall.AttachTo(MainCanvas);
@@ -170,71 +170,74 @@ namespace SurfaceApplication1
             lastTime = currentTime;
             Random randomGenerator = new Random();
 
+
             foreach (IdeaBall ball in allBalls)
             {
-
-                ball.Velocity *= 0.99;
-                if (Math.Abs(ball.Velocity.X) < 0.00001) //TODO threashold
+                if (!ball.IsTouched)
                 {
-                    ball.Velocity = new Vector(0, ball.Velocity.Y);
-                }
-                if (Math.Abs(ball.Velocity.Y) < 0.00001)
-                {
-                    ball.Velocity = new Vector(ball.Velocity.Y, 0);
-                }
-
-                ball.Position += ball.Velocity;
-                if (rotationDampening <= 1)
-                {
-                    centerOfRotation = RotatePoint(centerOfRotation, centerOfGravity, 1);
-                    rotationDampening = 15;
-                }
-                else
-                {
-                    rotationDampening--;
-                }
-
-
-                ball.Velocity = ball.Velocity * 0.95; 
-                if (!ball.IsTouched && ball.affectedByGravity)
-                {
-
-                    IdeaBall cloxest = null;
-
-                    foreach (IdeaBall ib in gravityWells)
+                    ball.Velocity *= 0.99;
+                    if (Math.Abs(ball.Velocity.X) < 0.00001) //TODO threashold
                     {
-                        if (inGravityRange(ib, ball))
-                        {
-                            if (cloxest != null)
-                            {
-                                if ((gravDist(ib, ball) < gravDist(cloxest, ball))) cloxest = ib;
-                            }
-                            else
-                            {
-                                cloxest = ib;
-                            }
-                        }
+                        ball.Velocity = new Vector(0, ball.Velocity.Y);
+                    }
+                    if (Math.Abs(ball.Velocity.Y) < 0.00001)
+                    {
+                        ball.Velocity = new Vector(ball.Velocity.Y, 0);
                     }
 
-
-
-
-
-                    if (cloxest != null)
+                    ball.Position += ball.Velocity;
+                    if (rotationDampening <= 1)
                     {
-                        ball.Velocity = ball.Velocity + calcGravity(ball.Position.X, ball.Position.Y, (Point)cloxest.Position, gravity, cloxest);
+                        centerOfRotation = RotatePoint(centerOfRotation, centerOfGravity, 1);
+                        rotationDampening = 15;
                     }
                     else
                     {
-                        ball.Velocity = ball.Velocity + calcGravity(ball.Position.X, ball.Position.Y, centerOfGravity, gravity, null);
+                        rotationDampening--;
                     }
-                }
-                if (ball.Position.X >= _viewportWidthMax - ball.Radius && ball.Velocity.X > 0) ball.Velocity = new Vector(-ball.Velocity.X, ball.Velocity.Y);
-                if (ball.Position.X <= _viewportWidthMin + ball.Radius && ball.Velocity.X < 0) ball.Velocity = new Vector(-ball.Velocity.X, ball.Velocity.Y);
-                if (ball.Position.Y >= _viewportHeightMax - ball.Radius && ball.Velocity.Y > 0) ball.Velocity = new Vector(ball.Velocity.X, -ball.Velocity.Y);
-                if (ball.Position.Y <= _viewportHeightMin + ball.Radius && ball.Velocity.Y < 0) ball.Velocity = new Vector(ball.Velocity.X, -ball.Velocity.Y);
-                if (!ball.affectedByGravity && !ball.IsTouched) ball.Position = ball.gravPosition;
 
+
+                    ball.Velocity = ball.Velocity * 0.95;
+                    if (!ball.IsTouched && ball.affectedByGravity)
+                    {
+
+                        IdeaBall cloxest = null;
+
+                        foreach (IdeaBall ib in gravityWells)
+                        {
+                            if (inGravityRange(ib, ball))
+                            {
+                                if (cloxest != null)
+                                {
+                                    if ((gravDist(ib, ball) < gravDist(cloxest, ball))) cloxest = ib;
+                                }
+                                else
+                                {
+                                    cloxest = ib;
+                                }
+                            }
+                        }
+
+
+
+
+
+                        if (cloxest != null)
+                        {
+                            ball.Velocity = ball.Velocity + calcGravity(ball.Position.X, ball.Position.Y, (Point)cloxest.Position, gravity, cloxest);
+                        }
+                        else
+                        {
+                            ball.Velocity = ball.Velocity + calcGravity(ball.Position.X, ball.Position.Y, centerOfGravity, gravity, null);
+                        }
+                    }
+                    if (ball.Position.X >= _viewportWidthMax - ball.Radius && ball.Velocity.X > 0) ball.Velocity = new Vector(-ball.Velocity.X, ball.Velocity.Y);
+                    if (ball.Position.X <= _viewportWidthMin + ball.Radius && ball.Velocity.X < 0) ball.Velocity = new Vector(-ball.Velocity.X, ball.Velocity.Y);
+                    if (ball.Position.Y >= _viewportHeightMax - ball.Radius && ball.Velocity.Y > 0) ball.Velocity = new Vector(ball.Velocity.X, -ball.Velocity.Y);
+                    if (ball.Position.Y <= _viewportHeightMin + ball.Radius && ball.Velocity.Y < 0) ball.Velocity = new Vector(ball.Velocity.X, -ball.Velocity.Y);
+                    if (!ball.affectedByGravity && !ball.IsTouched) ball.Position = ball.gravPosition;
+
+                }
             }
             foreach (IdeaBall ball in allBalls)
             {
@@ -257,7 +260,7 @@ namespace SurfaceApplication1
             Debug.WriteLine(e.DeltaManipulation.Scale);
             foreach (IdeaBall ball in allBalls)
             {
-                ball.ApplyScale(e.DeltaManipulation.Scale, e.DeltaManipulation.Translation.Length, e.ManipulationOrigin);
+              //  ball.ApplyScale(e.DeltaManipulation.Scale, e.DeltaManipulation.Translation.Length, e.ManipulationOrigin);
             }
             e.Handled = true;
         }

@@ -32,7 +32,9 @@ namespace SurfaceApplication1
         System.Timers.Timer timer = new System.Timers.Timer();
         private int timerReset;
         private CanvasController CanvasCtrl;
-        private String text;
+        private String text; 
+        private TransformGroup transformGroup;
+        private RotateTransform rotation;
 
         public SolidColorBrush fill;
 
@@ -84,12 +86,16 @@ namespace SurfaceApplication1
             this.CanvasCtrl = CC;
             this.runHandler = true;
             this.text = text;
+            this.transformGroup = new TransformGroup();
+            this.rotation = new RotateTransform(0);
+            this.transformGroup.Children.Add(this.rotation);
 
 
             Ellipse = new Ellipse()
             {
                 Fill = fill,
             };
+
 
             Title = new TextBlock()
             {
@@ -105,10 +111,41 @@ namespace SurfaceApplication1
             timer.Elapsed += new ElapsedEventHandler(Ellipse_HoldGestureEvent);
             timer.Interval = 2000;
 
+            Ellipse.IsManipulationEnabled = true;
+
             Ellipse.TouchDown += new System.EventHandler<System.Windows.Input.TouchEventArgs>(Ellipse_TouchDown);
             Ellipse.TouchMove += new System.EventHandler<System.Windows.Input.TouchEventArgs>(Ellipse_TouchMove);
             Ellipse.TouchLeave += new System.EventHandler<System.Windows.Input.TouchEventArgs>(Ellipse_TouchLeave);
             Ellipse.AddHandler(TouchExtensions.TapGestureEvent, new RoutedEventHandler(Ellipse_TapGestureEvent));
+            //Ellipse.ManipulationStarting += this.TouchableThing_ManipulationStarting;
+            //Ellipse.ManipulationDelta += this.TouchableThing_ManipulationDelta;
+            //Ellipse.ManipulationInertiaStarting += this.TouchableThing_ManipulationInertiaStarting;
+     }
+ 
+        void TouchableThing_ManipulationStarting(object sender, ManipulationStartingEventArgs e)
+        {
+            e.ManipulationContainer = Ellipse;
+        }
+ 
+        void TouchableThing_ManipulationDelta(object sender, ManipulationDeltaEventArgs e)
+        {
+            // the center never changes in this sample, although we always compute it.
+            Point center = new Point(
+                 this.Ellipse.RenderSize.Width / 2.0, this.Ellipse.RenderSize.Height / 2.0);
+
+            // apply the rotation at the center of the rectangle if it has changed
+            this.rotation.CenterX = center.X;
+            this.rotation.CenterY = center.Y;
+            this.rotation.Angle += e.DeltaManipulation.Rotation;
+
+        }
+       
+        void TouchableThing_ManipulationInertiaStarting(object sender, ManipulationInertiaStartingEventArgs e)
+        {
+            e.RotationBehavior = new InertiaRotationBehavior();
+            e.RotationBehavior.InitialVelocity = e.InitialVelocities.AngularVelocity;
+            // 720 degrees per second squared.
+            e.RotationBehavior.DesiredDeceleration = 720 / (1000.0 * 1000.0);  
         }
 
         public bool Clicked { get; set; }
@@ -119,7 +156,6 @@ namespace SurfaceApplication1
             if (runHandler)
             {
                 CanvasCtrl.votingInitiated(this);
-                //this.Radius = this.Radius + 3;
             }
         }
 
@@ -146,7 +182,7 @@ namespace SurfaceApplication1
             if (runHandler)
             {
                 // If this contact is the one that was remembered
-                if (e.TouchDevice == ellipseControlTouchDevice)
+                if (e.TouchDevice == this.ellipseControlTouchDevice)
                 {
                     // Forget about this contact.
                     ellipseControlTouchDevice = null;
@@ -176,7 +212,7 @@ namespace SurfaceApplication1
         {
             if (runHandler)
             {
-                if (e.TouchDevice == ellipseControlTouchDevice)
+                if (e.TouchDevice == this.ellipseControlTouchDevice)
                 {
                     if (timerReset == 10)
                     {
@@ -184,6 +220,8 @@ namespace SurfaceApplication1
                         timer.Start();
                         timerReset = 0;
                     }
+
+                    Ellipse x = sender as Ellipse;
 
                     timerReset++;
 
