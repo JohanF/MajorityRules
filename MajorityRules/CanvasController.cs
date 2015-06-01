@@ -46,6 +46,7 @@ namespace SurfaceApplication1
         private bool votingMode;
         private bool gravityEnabled;
         private GravityBall gravityButtonBall;
+        private BallInfoText ballInfoText;
 
         private int _radius;
         private Canvas MainCanvas;
@@ -153,8 +154,11 @@ namespace SurfaceApplication1
            // MainCanvas.ManipulationDelta += new EventHandler<System.Windows.Input.ManipulationDeltaEventArgs>(MainCanvas_ManipulationDelta);
             yesBall = new VoteBall(new Vector(0, 0), this, Color.FromArgb(0, 0, 255, 0), 25, true);
             noBall = new VoteBall(new Vector(0, 0), this, Color.FromArgb(0, 255, 0, 0), 25, false);
+            ballInfoText = new BallInfoText(new Vector(0, 0), this, 250, 150, "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean luctus aliquam justo quis iaculis. Donec a purus dignissim, scelerisque massa quis, dignissim erat. Fusce vestibulum ante eu lacinia interdum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. In hac habitasse platea dictumst. Nam orci turpis, imperdiet vitae ligula id, cursus iaculis orci.");
+            ballInfoText.grid.Visibility = Visibility.Hidden;
             yesBall.AttachTo(MainCanvas);
             noBall.AttachTo(MainCanvas);
+            ballInfoText.AttachTo(MainCanvas);
 
             //this._mainCanvas.AddHandler(TouchExtensions.TapGestureEvent, new RoutedEventHandler(Canvas_TapGestureEvent));
        
@@ -256,6 +260,8 @@ namespace SurfaceApplication1
                         yesBall.position.Y = ball.Position.Y;
                         noBall.position.X = ball.Position.X - ball.Radius - 55;
                         noBall.position.Y = ball.Position.Y;
+                        ballInfoText.position.X = ball.Position.X;
+                        ballInfoText.position.Y = ball.Position.Y + ball.Radius + 75;
                     }
                 }
             }
@@ -281,6 +287,7 @@ namespace SurfaceApplication1
             }
             yesBall.Draw();
             noBall.Draw();
+            ballInfoText.Draw();
 
         }
 
@@ -418,11 +425,13 @@ namespace SurfaceApplication1
                 yesBall.fill.Color = Color.FromArgb(123, yesBall.fill.Color.R, yesBall.fill.Color.G, yesBall.fill.Color.B);
                 yesBall.selectedBall = b;
                 yesBall.ballClicked = true;
-                Canvas.SetZIndex(yesBall.Ellipse, this._mainCanvas.Children.Count-1);
+                Canvas.SetZIndex(yesBall.Ellipse, this._mainCanvas.Children.Count-2);
                 noBall.fill.Color = Color.FromArgb(123, noBall.fill.Color.R, noBall.fill.Color.G, noBall.fill.Color.B);
                 noBall.selectedBall = b;
                 noBall.ballClicked = true;
-                Canvas.SetZIndex(noBall.Ellipse, this._mainCanvas.Children.Count);
+                Canvas.SetZIndex(noBall.Ellipse, this._mainCanvas.Children.Count-1);
+                ballInfoText.grid.Visibility = Visibility.Visible;
+                Canvas.SetZIndex(ballInfoText.textBlock, this._mainCanvas.Children.Count);
 
                 this.votingMode = true;
             }
@@ -464,6 +473,7 @@ namespace SurfaceApplication1
             yesBall.ballClicked = false;
             noBall.fill.Color = Color.FromArgb(0, noBall.fill.Color.R, noBall.fill.Color.G, noBall.fill.Color.B);
             noBall.ballClicked = false;
+            ballInfoText.grid.Visibility = Visibility.Hidden;
             this.votingMode = false;
         }
 
