@@ -43,7 +43,9 @@ namespace SurfaceApplication1
         private List<IdeaBall> gravityWells;
         private VoteBall yesBall;
         private VoteBall noBall;
-        private bool votingMode; 
+        private bool votingMode;
+        private bool gravityEnabled;
+        private GravityBall gravityButtonBall;
 
         private int _radius;
         private Canvas MainCanvas;
@@ -94,6 +96,7 @@ namespace SurfaceApplication1
             this._mainCanvas = MainCanvas;
             this.centerOfGravity = new Point();
             this.centerOfRotation = new Point();
+            this.gravityEnabled = true;
 
             centerOfGravity.X = width / 2;
             centerOfGravity.Y = height/2;
@@ -122,8 +125,11 @@ namespace SurfaceApplication1
 
             //add buttonBall to add new idea
             addButtonBall = new ButtonBall(new Vector(random.Next(151, 800), random.Next(0, 600)), new Vector(random.Next(2, 5), random.Next(2, 5)), this._mainCanvas, random.Next(2, 8) * 10, Color.FromArgb(255, 255, 0, 0), this, "Add new Idea");
+            gravityButtonBall = new GravityBall(new Vector(random.Next(151, 800), random.Next(0, 600)), new Vector(random.Next(2, 5), random.Next(2, 5)), this._mainCanvas, random.Next(2, 8) * 10, Color.FromArgb(255, 0, 0, 255), this, "Add new Idea");
             allBalls.AddRange(ideaBalls);
             allBalls.Add(addButtonBall);
+            allBalls.Add(gravityButtonBall);
+
 
             foreach (IdeaBall ball in allBalls)
             {
@@ -298,58 +304,60 @@ namespace SurfaceApplication1
 
             Vector newGravVelocity = new Vector();
 
-           
 
 
+            if (gravityEnabled)
+            {
 
-            double angleInDegrees = Math.Atan2(dY, dX) * 180 / Math.PI;
+                double angleInDegrees = Math.Atan2(dY, dX) * 180 / Math.PI;
 
-            //b.Text = System.Convert.ToString("Cos = " + Math.Cos(angleInDegrees) + "Sin = " + Math.Sin(angleInDegrees));
+                //b.Text = System.Convert.ToString("Cos = " + Math.Cos(angleInDegrees) + "Sin = " + Math.Sin(angleInDegrees));
 
-            if (Math.Abs(dY) < 3 && dX < 0)
-            {
-                newGravVelocity.X = G;
-            }
-            else if (Math.Abs(dY) < 3 && dX > 0)
-            {
-                newGravVelocity.X = -G;
-            }
-            else if (Math.Abs(dX) < 3 && dY > 0)
-            {
-                newGravVelocity.Y = -G;
-            }
-            else if (Math.Abs(dX) < 3 && dY > 0)
-            {
-                newGravVelocity.Y = -G;
-            }
-            else
-            {
-                if (attractor != centerOfGravity)
+                if (Math.Abs(dY) < 3 && dX < 0)
                 {
-                    if (Math.Abs(dY) < (b.Radius + 30) && Math.Abs(dX) < (b.Radius + 30))
-                    {
-                        newGravVelocity.X = G * (Math.Cos(angleInDegrees))*0.1;
-                        newGravVelocity.Y = G * (Math.Sin(angleInDegrees))*0.1;
-                    }
-                    else
-                    {
-
-                        newGravVelocity.X = G * (Math.Cos(angleInDegrees));
-                        newGravVelocity.Y = G * (Math.Sin(angleInDegrees));
-                    }
+                    newGravVelocity.X = G;
+                }
+                else if (Math.Abs(dY) < 3 && dX > 0)
+                {
+                    newGravVelocity.X = -G;
+                }
+                else if (Math.Abs(dX) < 3 && dY > 0)
+                {
+                    newGravVelocity.Y = -G;
+                }
+                else if (Math.Abs(dX) < 3 && dY > 0)
+                {
+                    newGravVelocity.Y = -G;
                 }
                 else
                 {
-                    if (Math.Abs(dY) < safeZoneY && Math.Abs(dX) < safeZoneX)
+                    if (attractor != centerOfGravity)
                     {
-                        newGravVelocity.X = G * (Math.Cos(angleInDegrees)) * 0.1;
-                        newGravVelocity.Y = G * (Math.Sin(angleInDegrees)) * 0.1;
+                        if (Math.Abs(dY) < (b.Radius + 30) && Math.Abs(dX) < (b.Radius + 30))
+                        {
+                            newGravVelocity.X = G * (Math.Cos(angleInDegrees)) * 0.1;
+                            newGravVelocity.Y = G * (Math.Sin(angleInDegrees)) * 0.1;
+                        }
+                        else
+                        {
+
+                            newGravVelocity.X = G * (Math.Cos(angleInDegrees));
+                            newGravVelocity.Y = G * (Math.Sin(angleInDegrees));
+                        }
                     }
                     else
                     {
+                        if (Math.Abs(dY) < safeZoneY && Math.Abs(dX) < safeZoneX)
+                        {
+                            newGravVelocity.X = G * (Math.Cos(angleInDegrees)) * 0.1;
+                            newGravVelocity.Y = G * (Math.Sin(angleInDegrees)) * 0.1;
+                        }
+                        else
+                        {
 
-                        newGravVelocity.X = G * (Math.Cos(angleInDegrees));
-                        newGravVelocity.Y = G * (Math.Sin(angleInDegrees));
+                            newGravVelocity.X = G * (Math.Cos(angleInDegrees));
+                            newGravVelocity.Y = G * (Math.Sin(angleInDegrees));
+                        }
                     }
                 }
             }
@@ -472,6 +480,15 @@ namespace SurfaceApplication1
             ideaBalls.Add(ideaBall);
             ideaBall.AttachTo(this._mainCanvas);
             allBalls.Add(ideaBall);
+        }
+
+        public void disableGravity()
+        {
+            this.gravityEnabled = false;
+        }
+        public void enableGravity()
+        {
+            this.gravityEnabled = true;
         }
     }
 }

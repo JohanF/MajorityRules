@@ -62,6 +62,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="GravityBall.cs" />
     <Compile Include="Events.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="MyMessage.cs" />

@@ -164,6 +164,8 @@ namespace SurfaceApplication1
         {
             if (runHandler)
             {
+                
+
                 if (this.affectedByGravity)
                 {
                     this.gravPosition = this.Position;
@@ -187,7 +189,7 @@ namespace SurfaceApplication1
                 {
                     // Forget about this contact.
                     ellipseControlTouchDevice = null;
-                    if (!this.affectedByGravity) this.Velocity = new Vector(deltaX * 5, deltaY * 5);
+                    if (this.affectedByGravity) this.Velocity = new Vector(deltaX * 3, deltaY * 3);
                     this.IsTouched = false;
                 }
                 releasePoint = e.TouchDevice.GetTouchPoint(this.mainCanvas).Position;
