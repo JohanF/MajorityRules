@@ -22,7 +22,7 @@ namespace SurfaceApplication1
 
         protected override void Ellipse_TapGestureEvent(object sender, RoutedEventArgs e)
         {
-            if (runHandler)
+            if (runHandler && Clicked == false)
             {
 
                 CanvasCtrl.disableNonFocusedBalls(this);

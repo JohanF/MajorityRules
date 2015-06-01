@@ -112,14 +112,15 @@ namespace SurfaceApplication1
             timer.Interval = 2000;
 
             Ellipse.IsManipulationEnabled = true;
+            this.Ellipse.RenderTransform = this.transformGroup;
 
             Ellipse.TouchDown += new System.EventHandler<System.Windows.Input.TouchEventArgs>(Ellipse_TouchDown);
             Ellipse.TouchMove += new System.EventHandler<System.Windows.Input.TouchEventArgs>(Ellipse_TouchMove);
             Ellipse.TouchLeave += new System.EventHandler<System.Windows.Input.TouchEventArgs>(Ellipse_TouchLeave);
             Ellipse.AddHandler(TouchExtensions.TapGestureEvent, new RoutedEventHandler(Ellipse_TapGestureEvent));
-            //Ellipse.ManipulationStarting += this.TouchableThing_ManipulationStarting;
-            //Ellipse.ManipulationDelta += this.TouchableThing_ManipulationDelta;
-            //Ellipse.ManipulationInertiaStarting += this.TouchableThing_ManipulationInertiaStarting;
+            Ellipse.ManipulationStarting += this.TouchableThing_ManipulationStarting;
+            Ellipse.ManipulationDelta += this.TouchableThing_ManipulationDelta;
+            Ellipse.ManipulationInertiaStarting += this.TouchableThing_ManipulationInertiaStarting;
      }
  
         void TouchableThing_ManipulationStarting(object sender, ManipulationStartingEventArgs e)

@@ -466,7 +466,7 @@ namespace SurfaceApplication1
             addButtonBall.Clicked = false;
             enableNonFocusedBalls(addButtonBall);
             Debug.WriteLine("Add Ball");
-            IdeaBall ideaBall = new IdeaBall(new Vector(random.Next(151, 800), random.Next(0, 600)), new Vector(random.Next(2, 5), random.Next(2, 5)), this._mainCanvas, 4 * 10, Color.FromArgb((byte)random.Next(100, 255), (byte)random.Next(0, 255), (byte)random.Next(0, 255), (byte)random.Next(0, 255)), this, text);
+            IdeaBall ideaBall = new IdeaBall(new Vector(random.Next(151, 800), random.Next(0, 600)), new Vector(0,0), this._mainCanvas, 4 * 10, Color.FromArgb((byte)random.Next(100, 255), (byte)random.Next(0, 255), (byte)random.Next(0, 255), (byte)random.Next(0, 255)), this, text);
             safeZoneX += 10;
             safeZoneY += 10;
             ideaBalls.Add(ideaBall);
