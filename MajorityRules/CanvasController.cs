@@ -172,7 +172,7 @@ namespace SurfaceApplication1
             dispatchTimer.Tick += new EventHandler(Update);
             dispatchTimer.Start();
 
-            MainCanvas.ManipulationDelta += new EventHandler<System.Windows.Input.ManipulationDeltaEventArgs>(MainCanvas_ManipulationDelta);
+            //MainCanvas.ManipulationDelta += new EventHandler<System.Windows.Input.ManipulationDeltaEventArgs>(MainCanvas_ManipulationDelta);
             yesBall = new VoteBall(new Vector(0, 0), this, Color.FromArgb(0, 0, 255, 0), 25, true);
             noBall = new VoteBall(new Vector(0, 0), this, Color.FromArgb(0, 255, 0, 0), 25, false);
             ballInfoText = new BallInfoText(new Vector(0, 0), this, 250, 150, "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean luctus aliquam justo quis iaculis. Donec a purus dignissim, scelerisque massa quis, dignissim erat. Fusce vestibulum ante eu lacinia interdum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. In hac habitasse platea dictumst. Nam orci turpis, imperdiet vitae ligula id, cursus iaculis orci.");

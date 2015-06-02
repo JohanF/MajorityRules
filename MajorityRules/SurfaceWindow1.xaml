@@ -7,7 +7,7 @@
                  ResizeMode="NoResize"  
     Title="SurfaceApplication1" mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" d:DesignHeight="309" d:DesignWidth="662" SizeToContent="WidthAndHeight">
     <Grid>
-        <Canvas Name="MainCanvas" Background="DarkSlateGray">
+        <Canvas Name="MainCanvas" Background="WhiteSmoke">
 
             <!-- 
         The ellipse that will be dragged around. 
