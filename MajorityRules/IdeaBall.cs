@@ -30,7 +30,7 @@ namespace SurfaceApplication1
         protected Boolean isPressingMovement;
         private const int holdTime = 10;
         System.Timers.Timer timer = new System.Timers.Timer();
-        System.Timers.Timer pulseTimer = new System.Timers.Timer();
+        protected System.Timers.Timer pulseTimer = new System.Timers.Timer();
         private int timerReset;
         private CanvasController CanvasCtrl;
         private String text; 
@@ -113,7 +113,7 @@ namespace SurfaceApplication1
             timer.Interval = 2000;
 
             pulseTimer.Elapsed += new ElapsedEventHandler(Ellipse_ClickedFeedbackEvent);
-            pulseTimer.Interval = 250;
+            pulseTimer.Interval = 125;
 
             Ellipse.IsManipulationEnabled = true;
             this.Ellipse.RenderTransform = this.transformGroup;
