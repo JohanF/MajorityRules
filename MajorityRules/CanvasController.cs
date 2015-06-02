@@ -17,6 +17,24 @@ using Microsoft.Surface.Presentation.Input;
 
 namespace SurfaceApplication1
 {
+
+    class RandomIdea
+    {
+
+        private static List<string> ideas = new List<string> { "Better WIFI signal", "More tables", "Digital booking of rooms", "Sound damping", "More chairs", "More sofas", "Phone chargers", "More power outlets", "Extention cords", "Better lightning" };
+        private static Random random = new Random();
+
+
+        public static string Get()
+        {
+
+            string idea = ideas[random.Next(0, ideas.Count - 1)];
+            ideas.Remove(idea);
+            return idea;
+        }
+
+    }
+
     public class CanvasController
     {
         private Canvas _mainCanvas;
@@ -64,9 +82,11 @@ namespace SurfaceApplication1
             }
         }
 
-        public CanvasController(Canvas MainCanvas, int width, int height)
-        {
+        private TextBlock debugText;
 
+        public CanvasController(Canvas MainCanvas, int width, int height, TextBlock debugText)
+        {
+            this.debugText = debugText;
             /*
             SolidColorBrush fill = new SolidColorBrush()
             {
@@ -114,9 +134,10 @@ namespace SurfaceApplication1
             
 
             //TODO Get balls from JSON
-            for (int i = 0; i < 1; i++)
+            for (int i = 0; i < 8; i++)
             {
                 ideaBalls.Add(new IdeaBall(new Vector(random.Next(151, 800), random.Next(0, 600)), new Vector(random.Next(2, 5), random.Next(2, 5)), this._mainCanvas, random.Next(2, 8) * 10, Color.FromArgb((byte)random.Next(100, 255), (byte)random.Next(0, 255), (byte)random.Next(0, 255), (byte)random.Next(0, 255)), this, "hej"));
+                ideaBalls.Last().Title.Text = RandomIdea.Get();
             }
             //items.Add(new IdeaBall(new Vector(100, 100), new Vector(5.1, 5)));
             //items.Add(new IdeaBall(new Vector(500, 500), new Vector(-5, -5)));
@@ -151,7 +172,7 @@ namespace SurfaceApplication1
             dispatchTimer.Tick += new EventHandler(Update);
             dispatchTimer.Start();
 
-           // MainCanvas.ManipulationDelta += new EventHandler<System.Windows.Input.ManipulationDeltaEventArgs>(MainCanvas_ManipulationDelta);
+            MainCanvas.ManipulationDelta += new EventHandler<System.Windows.Input.ManipulationDeltaEventArgs>(MainCanvas_ManipulationDelta);
             yesBall = new VoteBall(new Vector(0, 0), this, Color.FromArgb(0, 0, 255, 0), 25, true);
             noBall = new VoteBall(new Vector(0, 0), this, Color.FromArgb(0, 255, 0, 0), 25, false);
             ballInfoText = new BallInfoText(new Vector(0, 0), this, 250, 150, "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean luctus aliquam justo quis iaculis. Donec a purus dignissim, scelerisque massa quis, dignissim erat. Fusce vestibulum ante eu lacinia interdum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. In hac habitasse platea dictumst. Nam orci turpis, imperdiet vitae ligula id, cursus iaculis orci.");
@@ -269,7 +290,8 @@ namespace SurfaceApplication1
 
         void MainCanvas_ManipulationDelta(object sender, System.Windows.Input.ManipulationDeltaEventArgs e)
         {
-            Debug.WriteLine(e.DeltaManipulation.Scale);
+            debugText.Text = ""+e.DeltaManipulation.Scale;
+            //Debug.WriteLine(e.DeltaManipulation.Scale);
             foreach (IdeaBall ball in allBalls)
             {
               //  ball.ApplyScale(e.DeltaManipulation.Scale, e.DeltaManipulation.Translation.Length, e.ManipulationOrigin);

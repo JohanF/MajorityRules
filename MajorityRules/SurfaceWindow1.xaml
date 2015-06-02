@@ -21,6 +21,7 @@
                  Height="50"
                  FontSize="20" MaxHeight="100">
         </TextBox>
+        <TextBlock Visibility="Collapsed" Foreground="Black"  FontSize="20" Width="200" Name="DebugText" />
         <s:ScatterView Name="MainScatterView" />
     </Grid>
     
