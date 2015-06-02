@@ -61,6 +61,7 @@ namespace SurfaceApplication1
         private List<IdeaBall> gravityWells;
         private VoteBall yesBall;
         private VoteBall noBall;
+        private VoteBall cancelBall;
         private bool votingMode;
         private bool gravityEnabled;
         private GravityBall gravityButtonBall;
@@ -126,8 +127,8 @@ namespace SurfaceApplication1
             centerOfRotation.Y = height / 2 + 100;
 
 
-            safeZoneY = 50;
-            safeZoneX = 50;
+            safeZoneY = 150;
+            safeZoneX = 150;
 
             theta = 180 / Math.PI;
 
@@ -136,7 +137,7 @@ namespace SurfaceApplication1
             //TODO Get balls from JSON
             for (int i = 0; i < 8; i++)
             {
-                ideaBalls.Add(new IdeaBall(new Vector(random.Next(151, 800), random.Next(0, 600)), new Vector(random.Next(2, 5), random.Next(2, 5)), this._mainCanvas, random.Next(2, 8) * 10, Color.FromArgb((byte)random.Next(100, 255), (byte)random.Next(0, 255), (byte)random.Next(0, 255), (byte)random.Next(0, 255)), this, "hej"));
+                ideaBalls.Add(new IdeaBall(new Vector(random.Next(151, 800), random.Next(0, 600)), new Vector(random.Next(2, 5), random.Next(2, 5)), this._mainCanvas, random.Next(5, 8) * 10, Color.FromArgb((byte)random.Next(75, 255), (byte)random.Next(0, 255), (byte)random.Next(0, 255), (byte)random.Next(0, 255)), this, "hej"));
                 ideaBalls.Last().Title.Text = RandomIdea.Get();
             }
             //items.Add(new IdeaBall(new Vector(100, 100), new Vector(5.1, 5)));
@@ -146,8 +147,8 @@ namespace SurfaceApplication1
             //items.Add(new IdeaBall(new Vector(500, 500), new Vector(-5, -5)));
 
             //add buttonBall to add new idea
-            addButtonBall = new ButtonBall(new Vector(random.Next(151, 800), random.Next(0, 600)), new Vector(random.Next(2, 5), random.Next(2, 5)), this._mainCanvas, random.Next(2, 8) * 10, Color.FromArgb(255, 255, 0, 0), this, "Add new Idea");
-            gravityButtonBall = new GravityBall(new Vector(random.Next(151, 800), random.Next(0, 600)), new Vector(random.Next(2, 5), random.Next(2, 5)), this._mainCanvas, random.Next(2, 8) * 10, Color.FromArgb(255, 0, 0, 255), this, "Add new Idea");
+            addButtonBall = new ButtonBall(new Vector(random.Next(151, 800), random.Next(0, 600)), new Vector(random.Next(2, 5), random.Next(2, 5)), this._mainCanvas, random.Next(5, 8) * 10, Color.FromArgb(255, 255, 0, 0), this, "Add new Idea");
+            gravityButtonBall = new GravityBall(new Vector(random.Next(151, 800), random.Next(0, 600)), new Vector(random.Next(2, 5), random.Next(2, 5)), this._mainCanvas, random.Next(5, 8) * 10, Color.FromArgb(255, 0, 0, 255), this, "Add new Idea");
             allBalls.AddRange(ideaBalls);
             allBalls.Add(addButtonBall);
             allBalls.Add(gravityButtonBall);
@@ -173,10 +174,13 @@ namespace SurfaceApplication1
             dispatchTimer.Start();
 
             //MainCanvas.ManipulationDelta += new EventHandler<System.Windows.Input.ManipulationDeltaEventArgs>(MainCanvas_ManipulationDelta);
-            yesBall = new VoteBall(new Vector(0, 0), this, Color.FromArgb(0, 0, 255, 0), 25, true, "✔");
-            noBall = new VoteBall(new Vector(0, 0), this, Color.FromArgb(0, 255, 0, 0), 25, false, "X");
+            yesBall = new VoteBall(new Vector(0, 0), this, Color.FromArgb(0, 0, 255, 0), 25, true, true, "+" );
+            noBall = new VoteBall(new Vector(0, 0), this, Color.FromArgb(0, 255, 0, 0), 25, false, true,"-");
+            cancelBall = new VoteBall(new Vector(0, 0), this, Color.FromArgb(0, 0, 255, 0), 25, true, false, "X");
+            
             ballInfoText = new BallInfoText(new Vector(0, 0), this, 250, 150, "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean luctus aliquam justo quis iaculis. Donec a purus dignissim, scelerisque massa quis, dignissim erat. Fusce vestibulum ante eu lacinia interdum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. In hac habitasse platea dictumst. Nam orci turpis, imperdiet vitae ligula id, cursus iaculis orci.");
             ballInfoText.grid.Visibility = Visibility.Hidden;
+            cancelBall.AttachTo(MainCanvas);
             yesBall.AttachTo(MainCanvas);
             noBall.AttachTo(MainCanvas);
             ballInfoText.AttachTo(MainCanvas);
@@ -281,6 +285,8 @@ namespace SurfaceApplication1
                         yesBall.position.Y = ball.Position.Y;
                         noBall.position.X = ball.Position.X - ball.Radius - 55;
                         noBall.position.Y = ball.Position.Y;
+                        cancelBall.position.X = ball.Position.X;
+                        cancelBall.position.Y = ball.Position.Y - ball.Radius - 35;
                         ballInfoText.position.X = ball.Position.X;
                         ballInfoText.position.Y = ball.Position.Y + ball.Radius + 75;
                     }
@@ -309,6 +315,7 @@ namespace SurfaceApplication1
             }
             yesBall.Draw();
             noBall.Draw();
+            cancelBall.Draw();
             ballInfoText.Draw();
 
         }
@@ -444,6 +451,11 @@ namespace SurfaceApplication1
             if (!votingMode)
             {
                 disableNonFocusedBalls(b);
+                cancelBall.fill.Color = b.fill.Color;
+                cancelBall.selectedBall = b;
+                cancelBall.ballClicked = true;
+                cancelBall.Title.Visibility = Visibility.Visible;
+                Canvas.SetZIndex(cancelBall.Ellipse, this._mainCanvas.Children.Count - 3);
                 yesBall.fill.Color = Color.FromArgb(123, yesBall.fill.Color.R, yesBall.fill.Color.G, yesBall.fill.Color.B);
                 yesBall.selectedBall = b;
                 yesBall.ballClicked = true;
@@ -464,6 +476,9 @@ namespace SurfaceApplication1
         public void votingCancelled(IdeaBall b)
         {
             enableNonFocusedBalls(b);
+            cancelBall.fill.Color = Color.FromArgb(0, cancelBall.fill.Color.R, cancelBall.fill.Color.G, cancelBall.fill.Color.B);
+            cancelBall.Title.Visibility = Visibility.Hidden;
+            cancelBall.ballClicked = false;
             yesBall.fill.Color = Color.FromArgb(0, yesBall.fill.Color.R, yesBall.fill.Color.G, yesBall.fill.Color.B);
             yesBall.Title.Visibility = Visibility.Hidden;
             yesBall.ballClicked = false;
@@ -513,6 +528,25 @@ namespace SurfaceApplication1
             enableNonFocusedBalls(b);
             safeZoneX += safeZoneTransform;
             safeZoneY += safeZoneTransform;
+            cancelBall.fill.Color = Color.FromArgb(0, cancelBall.fill.Color.R, cancelBall.fill.Color.G, cancelBall.fill.Color.B);
+            cancelBall.Title.Visibility = Visibility.Hidden;
+            cancelBall.ballClicked = false;
+            yesBall.fill.Color = Color.FromArgb(0, yesBall.fill.Color.R, yesBall.fill.Color.G, yesBall.fill.Color.B);
+            yesBall.Title.Visibility = Visibility.Hidden;
+            yesBall.ballClicked = false;
+            noBall.fill.Color = Color.FromArgb(0, noBall.fill.Color.R, noBall.fill.Color.G, noBall.fill.Color.B);
+            noBall.Title.Visibility = Visibility.Hidden;
+            noBall.ballClicked = false;
+            ballInfoText.grid.Visibility = Visibility.Hidden;
+            this.votingMode = false;
+        }
+
+        public void voteGotCancelled(IdeaBall b)
+        {
+            enableNonFocusedBalls(b);
+            cancelBall.fill.Color = Color.FromArgb(0, cancelBall.fill.Color.R, cancelBall.fill.Color.G, cancelBall.fill.Color.B);
+            cancelBall.Title.Visibility = Visibility.Hidden;
+            cancelBall.ballClicked = false;
             yesBall.fill.Color = Color.FromArgb(0, yesBall.fill.Color.R, yesBall.fill.Color.G, yesBall.fill.Color.B);
             yesBall.Title.Visibility = Visibility.Hidden;
             yesBall.ballClicked = false;
@@ -530,7 +564,7 @@ namespace SurfaceApplication1
             addButtonBall.Clicked = false;
             enableNonFocusedBalls(addButtonBall);
             Debug.WriteLine("Add Ball");
-            IdeaBall ideaBall = new IdeaBall(new Vector(random.Next(151, 800), random.Next(0, 600)), new Vector(0,0), this._mainCanvas, 4 * 10, Color.FromArgb((byte)random.Next(100, 255), (byte)random.Next(0, 255), (byte)random.Next(0, 255), (byte)random.Next(0, 255)), this, text);
+            IdeaBall ideaBall = new IdeaBall(new Vector(random.Next(151, 800), random.Next(0, 600)), new Vector(0,0), this._mainCanvas, 6 * 10, Color.FromArgb((byte)random.Next(55, 255), (byte)random.Next(0, 255), (byte)random.Next(0, 255), (byte)random.Next(0, 255)), this, text);
             safeZoneX += 10;
             safeZoneY += 10;
             ideaBalls.Add(ideaBall);

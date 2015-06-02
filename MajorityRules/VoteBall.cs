@@ -21,6 +21,7 @@ namespace SurfaceApplication1
         private bool yes;
         public bool ballClicked;
         private int safeZoneT;
+        private bool voteBool;
 
         public TextBlock Title;
 
@@ -37,7 +38,7 @@ namespace SurfaceApplication1
 
         
 
-        public VoteBall(Vector p, CanvasController CC, Color c, int R, bool yn, string text)
+        public VoteBall(Vector p, CanvasController CC, Color c, int R, bool yn, bool vB, string text)
         {
             fill = new SolidColorBrush()
             {
@@ -57,6 +58,7 @@ namespace SurfaceApplication1
             this.CanvasCtrl = CC;
             this._radius = R;
             this.yes = yn;
+            this.voteBool = vB;
             this.selectedBall = null;
             this.ballClicked = false;
             this.safeZoneT = 0;
@@ -74,19 +76,27 @@ namespace SurfaceApplication1
         {
             if (ballClicked)
             {
-                if (yes)
+                if (voteBool)
                 {
-                    selectedBall.Radius += 3;
-                    safeZoneT = 3;
+                    if (yes)
+                    {
+                        selectedBall.Radius += 3;
+                        safeZoneT = 3;
+                        CanvasCtrl.voteGotClicked(selectedBall, safeZoneT);
 
+                    }
+                    else
+                    {
+                        selectedBall.Radius -= 3;
+                        safeZoneT = -3;
+                        CanvasCtrl.voteGotClicked(selectedBall, safeZoneT);
+                    }
                 }
                 else
                 {
-                    selectedBall.Radius -= 3;
-                    safeZoneT = -3;
+                    CanvasCtrl.voteGotCancelled(selectedBall);
                 }
 
-                CanvasCtrl.voteGotClicked(selectedBall, safeZoneT);
             }
         }
 

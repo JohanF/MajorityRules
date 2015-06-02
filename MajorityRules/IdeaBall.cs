@@ -200,7 +200,7 @@ namespace SurfaceApplication1
                 {
                     // Forget about this contact.
                     ellipseControlTouchDevice = null;
-                    if (this.affectedByGravity) this.Velocity = new Vector(deltaX * 3, deltaY * 3);
+                    
                     this.IsTouched = false;
                 }
                 releasePoint = e.TouchDevice.GetTouchPoint(this.mainCanvas).Position;
@@ -213,6 +213,7 @@ namespace SurfaceApplication1
                 else
                 {
                     isPressingMovement = false;
+                    if (this.affectedByGravity) this.Velocity = new Vector(deltaX * 3, deltaY * 3);
                 }
 
                 timer.Stop();
