@@ -20,13 +20,13 @@
             Name="BackgroundBall" 
             Height="300" 
             Width="300" 
-            Fill="#FFAA0F0F" Visibility="Hidden">
+            Fill="#FF25EB00" Visibility="Hidden">
             
         </Ellipse>
         <TextBox Name="IdeaInput"
                  Width="200"
                  Height="50"
-                 FontSize="20" MaxHeight="100">
+                 FontSize="20" MaxHeight="100" Text="&lt;Enter new idea&gt;">
         </TextBox>
         <TextBlock Visibility="Collapsed" Foreground="Black"  FontSize="20" Width="200" Name="DebugText" />
         <s:ScatterView Name="MainScatterView" />
