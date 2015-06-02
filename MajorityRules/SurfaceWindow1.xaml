@@ -5,7 +5,7 @@
                  x:Name="MainWindow"
     WindowStartupLocation="CenterScreen" WindowState="Maximized"
                  ResizeMode="NoResize"  
-    Title="SurfaceApplication1" mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" d:DesignHeight="309" d:DesignWidth="662" SizeToContent="WidthAndHeight" Background="#FFEF0606" AutoSignalLoadComplete="False">
+    Title="SurfaceApplication1" mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" d:DesignHeight="309" d:DesignWidth="662" SizeToContent="WidthAndHeight" Background="#FFEF0606" AutoSignalLoadComplete="False" Loaded="MainWindow_Loaded">
     <Grid>
         <Canvas Name="MainCanvas" Background="WhiteSmoke">
 
@@ -24,9 +24,11 @@
             
         </Ellipse>
         <TextBox Name="IdeaInput"
+                 GotFocus="IdeaInput_GotFocus"
+                 LostFocus="IdeaInput_LostFocus"
                  Width="200"
                  Height="50"
-                 FontSize="20" MaxHeight="100" Text="&lt;Enter new idea&gt;">
+                 FontSize="20" MaxHeight="100" Text="Enter new idea" Background="{x:Null}" Foreground="#C8000000" BorderThickness="0" TextAlignment="Center" VerticalContentAlignment="Center">
         </TextBox>
         <TextBlock Visibility="Collapsed" Foreground="Black"  FontSize="20" Width="200" Name="DebugText" />
         <s:ScatterView Name="MainScatterView" />
