@@ -22,6 +22,8 @@ namespace SurfaceApplication1
         public bool ballClicked;
         private int safeZoneT;
 
+        public TextBlock Title;
+
         public Ellipse Ellipse { get; private set; }
         public IdeaBall selectedBall { get; set; }
         public int Radius
@@ -33,11 +35,22 @@ namespace SurfaceApplication1
             }
         }
 
-        public VoteBall(Vector p, CanvasController CC, Color c, int R, bool yn)
+        
+
+        public VoteBall(Vector p, CanvasController CC, Color c, int R, bool yn, string text)
         {
             fill = new SolidColorBrush()
             {
                 Color = c
+            };
+
+            Title = new TextBlock()
+            {
+                Text = text,
+                FontFamily = new FontFamily("Segoe UI"),
+                FontSize = 20,
+                TextAlignment = System.Windows.TextAlignment.Center,
+                Foreground = Brushes.Black
             };
 
             this.position = p;
@@ -47,6 +60,7 @@ namespace SurfaceApplication1
             this.selectedBall = null;
             this.ballClicked = false;
             this.safeZoneT = 0;
+            this.Title.Visibility = Visibility.Hidden;
 
             Ellipse = new Ellipse()
             {
@@ -82,12 +96,19 @@ namespace SurfaceApplication1
             Ellipse.Height = Ellipse.Width;
             Canvas.SetLeft(Ellipse, this.position.X - (Ellipse.Width / 2));
             Canvas.SetTop(Ellipse, this.position.Y - (Ellipse.Width / 2));
+
+            Title.Height = Ellipse.Width;
+            Title.Width = Ellipse.Width;
+
+            Canvas.SetLeft(Title, this.position.X - Title.ActualWidth / 2);
+            Canvas.SetTop(Title, this.position.Y - Title.ActualHeight / 3.5);
             
         }
 
         internal void AttachTo(Canvas MainCanvas)
         {
             MainCanvas.Children.Add(this.Ellipse);
+            MainCanvas.Children.Add(this.Title);
         }
     }
 }

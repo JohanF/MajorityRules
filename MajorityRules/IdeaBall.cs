@@ -309,6 +309,7 @@ namespace SurfaceApplication1
         {
             Ellipse.Width = (Radius * 2) * Scale;
             Ellipse.Height = Ellipse.Width;
+
             Title.Width = Ellipse.Width;
             Canvas.SetLeft(Ellipse, this.Position.X - (Ellipse.Width/2));
             Canvas.SetTop(Ellipse, this.Position.Y - (Ellipse.Width/2));

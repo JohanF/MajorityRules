@@ -173,8 +173,8 @@ namespace SurfaceApplication1
             dispatchTimer.Start();
 
             //MainCanvas.ManipulationDelta += new EventHandler<System.Windows.Input.ManipulationDeltaEventArgs>(MainCanvas_ManipulationDelta);
-            yesBall = new VoteBall(new Vector(0, 0), this, Color.FromArgb(0, 0, 255, 0), 25, true);
-            noBall = new VoteBall(new Vector(0, 0), this, Color.FromArgb(0, 255, 0, 0), 25, false);
+            yesBall = new VoteBall(new Vector(0, 0), this, Color.FromArgb(0, 0, 255, 0), 25, true, "✔");
+            noBall = new VoteBall(new Vector(0, 0), this, Color.FromArgb(0, 255, 0, 0), 25, false, "X");
             ballInfoText = new BallInfoText(new Vector(0, 0), this, 250, 150, "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean luctus aliquam justo quis iaculis. Donec a purus dignissim, scelerisque massa quis, dignissim erat. Fusce vestibulum ante eu lacinia interdum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. In hac habitasse platea dictumst. Nam orci turpis, imperdiet vitae ligula id, cursus iaculis orci.");
             ballInfoText.grid.Visibility = Visibility.Hidden;
             yesBall.AttachTo(MainCanvas);
@@ -447,10 +447,12 @@ namespace SurfaceApplication1
                 yesBall.fill.Color = Color.FromArgb(123, yesBall.fill.Color.R, yesBall.fill.Color.G, yesBall.fill.Color.B);
                 yesBall.selectedBall = b;
                 yesBall.ballClicked = true;
+                yesBall.Title.Visibility = Visibility.Visible;
                 Canvas.SetZIndex(yesBall.Ellipse, this._mainCanvas.Children.Count-2);
                 noBall.fill.Color = Color.FromArgb(123, noBall.fill.Color.R, noBall.fill.Color.G, noBall.fill.Color.B);
                 noBall.selectedBall = b;
                 noBall.ballClicked = true;
+                noBall.Title.Visibility = Visibility.Visible;
                 Canvas.SetZIndex(noBall.Ellipse, this._mainCanvas.Children.Count-1);
                 ballInfoText.grid.Visibility = Visibility.Visible;
                 Canvas.SetZIndex(ballInfoText.textBlock, this._mainCanvas.Children.Count);
@@ -463,8 +465,10 @@ namespace SurfaceApplication1
         {
             enableNonFocusedBalls(b);
             yesBall.fill.Color = Color.FromArgb(0, yesBall.fill.Color.R, yesBall.fill.Color.G, yesBall.fill.Color.B);
+            yesBall.Title.Visibility = Visibility.Hidden;
             yesBall.ballClicked = false;
             noBall.fill.Color = Color.FromArgb(0, noBall.fill.Color.R, noBall.fill.Color.G, noBall.fill.Color.B);
+            noBall.Title.Visibility = Visibility.Hidden;
             noBall.ballClicked = false;
             ballInfoText.grid.Visibility = Visibility.Hidden;
             this.votingMode = false;
@@ -510,8 +514,10 @@ namespace SurfaceApplication1
             safeZoneX += safeZoneTransform;
             safeZoneY += safeZoneTransform;
             yesBall.fill.Color = Color.FromArgb(0, yesBall.fill.Color.R, yesBall.fill.Color.G, yesBall.fill.Color.B);
+            yesBall.Title.Visibility = Visibility.Hidden;
             yesBall.ballClicked = false;
             noBall.fill.Color = Color.FromArgb(0, noBall.fill.Color.R, noBall.fill.Color.G, noBall.fill.Color.B);
+            noBall.Title.Visibility = Visibility.Hidden;
             noBall.ballClicked = false;
             ballInfoText.grid.Visibility = Visibility.Hidden;
             this.votingMode = false;
