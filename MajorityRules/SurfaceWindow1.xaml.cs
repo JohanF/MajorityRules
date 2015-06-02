@@ -71,6 +71,7 @@ namespace SurfaceApplication1
             }
             else if (e.Key == Key.Escape)
             {
+                canvasController.enableNonFocusedBallsButtonBall();
                 IdeaInput.Text = "";
                 IdeaInput.Visibility = Visibility.Hidden;
             }

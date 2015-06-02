@@ -437,6 +437,18 @@ namespace SurfaceApplication1
             }
         }
 
+        public void votingCancelled(IdeaBall b)
+        {
+            enableNonFocusedBalls(b);
+            yesBall.fill.Color = Color.FromArgb(0, yesBall.fill.Color.R, yesBall.fill.Color.G, yesBall.fill.Color.B);
+            yesBall.ballClicked = false;
+            noBall.fill.Color = Color.FromArgb(0, noBall.fill.Color.R, noBall.fill.Color.G, noBall.fill.Color.B);
+            noBall.ballClicked = false;
+            ballInfoText.grid.Visibility = Visibility.Hidden;
+            this.votingMode = false;
+        }
+
+
         public void disableNonFocusedBalls(IdeaBall b)
         {
             foreach (IdeaBall ball in allBalls)
@@ -462,6 +474,12 @@ namespace SurfaceApplication1
                     ball.runHandler = true;
                 }
             }
+        }
+
+        public void enableNonFocusedBallsButtonBall()
+        {
+            addButtonBall.Clicked = false;
+            enableNonFocusedBalls(addButtonBall);
         }
 
         public void voteGotClicked(IdeaBall b, int safeZoneTransform)

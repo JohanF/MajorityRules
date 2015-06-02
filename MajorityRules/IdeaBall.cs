@@ -153,7 +153,7 @@ namespace SurfaceApplication1
 
         protected virtual void Ellipse_TapGestureEvent(object sender, RoutedEventArgs e)
         {
-            
+
             if (runHandler)
             {
                 CanvasCtrl.votingInitiated(this);
