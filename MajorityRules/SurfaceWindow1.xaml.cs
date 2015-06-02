@@ -68,22 +68,26 @@ namespace SurfaceApplication1
                 canvasController.AddBall(IdeaInput.Text);
                 IdeaInput.Text = "";
                 IdeaInput.Visibility = Visibility.Hidden;
+                BackgroundBall.Visibility = Visibility.Hidden;
             }
             else if (e.Key == Key.Escape)
             {
                 canvasController.enableNonFocusedBallsButtonBall();
                 IdeaInput.Text = "";
                 IdeaInput.Visibility = Visibility.Hidden;
+                BackgroundBall.Visibility = Visibility.Hidden;
             }
         }
 
         private void toggleTextBoxHide()
         {
+            BackgroundBall.Visibility = System.Windows.Visibility.Visible;
             IdeaInput.Visibility = System.Windows.Visibility.Visible;
-            if (!IdeaInput.IsKeyboardFocused)
-            {
-                Keyboard.Focus(IdeaInput);
-            }
+            Debug.WriteLine("Toggle hide");
+            //if (!IdeaInput.IsKeyboardFocused)
+            //{
+            //    Keyboard.Focus(IdeaInput);
+            //}
         }
 
         /// <summary>
@@ -213,6 +217,25 @@ namespace SurfaceApplication1
 
             // Mark this event as handled.  
             e.Handled = true;
+        }
+
+        private void IdeaInput_GotFocus(object sender, RoutedEventArgs e)
+        {
+            IdeaInput.Text = "";
+            IdeaInput.Foreground = new SolidColorBrush(Color.FromRgb(0,0,0));
+        }
+        private void IdeaInput_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (IdeaInput.Text.Equals(""))
+            {
+                IdeaInput.Text = "Enter new idea";
+            }
+            IdeaInput.Foreground = new SolidColorBrush(Color.FromArgb(200, 0, 0, 0));
+        }
+
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

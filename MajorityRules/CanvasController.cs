@@ -147,8 +147,10 @@ namespace SurfaceApplication1
             //items.Add(new IdeaBall(new Vector(500, 500), new Vector(-5, -5)));
 
             //add buttonBall to add new idea
+
             addButtonBall = new ButtonBall(new Vector(random.Next(151, 800), random.Next(0, 600)), new Vector(random.Next(2, 5), random.Next(2, 5)), this._mainCanvas, random.Next(5, 8) * 10, Color.FromArgb(255, 255, 0, 0), this, "Add new Idea");
             gravityButtonBall = new GravityBall(new Vector(random.Next(151, 800), random.Next(0, 600)), new Vector(random.Next(2, 5), random.Next(2, 5)), this._mainCanvas, random.Next(5, 8) * 10, Color.FromArgb(255, 0, 0, 255), this, "Add new Idea");
+
             allBalls.AddRange(ideaBalls);
             allBalls.Add(addButtonBall);
             allBalls.Add(gravityButtonBall);
