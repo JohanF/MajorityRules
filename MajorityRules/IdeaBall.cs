@@ -30,6 +30,7 @@ namespace SurfaceApplication1
         protected Boolean isPressingMovement;
         private const int holdTime = 10;
         System.Timers.Timer timer = new System.Timers.Timer();
+        System.Timers.Timer pulseTimer = new System.Timers.Timer();
         private int timerReset;
         private CanvasController CanvasCtrl;
         private String text; 
@@ -111,6 +112,9 @@ namespace SurfaceApplication1
             timer.Elapsed += new ElapsedEventHandler(Ellipse_HoldGestureEvent);
             timer.Interval = 2000;
 
+            pulseTimer.Elapsed += new ElapsedEventHandler(Ellipse_ClickedFeedbackEvent);
+            pulseTimer.Interval = 250;
+
             Ellipse.IsManipulationEnabled = true;
             this.Ellipse.RenderTransform = this.transformGroup;
 
@@ -164,7 +168,8 @@ namespace SurfaceApplication1
         {
             if (runHandler)
             {
-                
+                pulseTimer.Start();
+                this.Radius = this.Radius + 5;
 
                 if (this.affectedByGravity)
                 {
@@ -178,6 +183,12 @@ namespace SurfaceApplication1
                     CanvasCtrl.removeGravityPoints(this);
                 }
             }   
+        }
+
+        void Ellipse_ClickedFeedbackEvent(object sender, ElapsedEventArgs e)
+        {
+            this.Radius = this.Radius - 5;
+            pulseTimer.Stop();
         }
 
         protected virtual void Ellipse_TouchLeave(object sender, System.Windows.Input.TouchEventArgs e)
