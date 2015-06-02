@@ -110,7 +110,7 @@ namespace SurfaceApplication1
             Radius = rad;
 
             timer.Elapsed += new ElapsedEventHandler(Ellipse_HoldGestureEvent);
-            timer.Interval = 2000;
+            timer.Interval = 1000;
 
             pulseTimer.Elapsed += new ElapsedEventHandler(Ellipse_ClickedFeedbackEvent);
             pulseTimer.Interval = 125;
