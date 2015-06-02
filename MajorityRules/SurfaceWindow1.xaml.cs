@@ -68,17 +68,21 @@ namespace SurfaceApplication1
                 canvasController.AddBall(IdeaInput.Text);
                 IdeaInput.Text = "";
                 IdeaInput.Visibility = Visibility.Hidden;
+                BackgroundBall.Visibility = Visibility.Hidden;
             }
             else if (e.Key == Key.Escape)
             {
                 IdeaInput.Text = "";
                 IdeaInput.Visibility = Visibility.Hidden;
+                BackgroundBall.Visibility = Visibility.Hidden;
             }
         }
 
         private void toggleTextBoxHide()
         {
+            BackgroundBall.Visibility = System.Windows.Visibility.Visible;
             IdeaInput.Visibility = System.Windows.Visibility.Visible;
+            Debug.WriteLine("Toggle hide");
             if (!IdeaInput.IsKeyboardFocused)
             {
                 Keyboard.Focus(IdeaInput);

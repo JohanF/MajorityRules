@@ -5,7 +5,7 @@
                  x:Name="MainWindow"
     WindowStartupLocation="CenterScreen" WindowState="Maximized"
                  ResizeMode="NoResize"  
-    Title="SurfaceApplication1" mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" d:DesignHeight="309" d:DesignWidth="662" SizeToContent="WidthAndHeight">
+    Title="SurfaceApplication1" mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" d:DesignHeight="309" d:DesignWidth="662" SizeToContent="WidthAndHeight" Background="#FFEF0606" AutoSignalLoadComplete="False">
     <Grid>
         <Canvas Name="MainCanvas" Background="White">
 
@@ -16,6 +16,13 @@
         -->
 
         </Canvas>
+        <Ellipse 
+            Name="BackgroundBall" 
+            Height="300" 
+            Width="300" 
+            Fill="#FFAA0F0F" Visibility="Hidden">
+            
+        </Ellipse>
         <TextBox Name="IdeaInput"
                  Width="200"
                  Height="50"
