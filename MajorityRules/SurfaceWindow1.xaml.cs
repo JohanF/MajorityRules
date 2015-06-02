@@ -66,14 +66,16 @@ namespace SurfaceApplication1
             if (e.Key == Key.Enter && IdeaInput.Text != "" && IdeaInput.Text != null)
             {
                 canvasController.AddBall(IdeaInput.Text);
-                IdeaInput.Text = "";
+                Keyboard.ClearFocus();
+                IdeaInput.Text = "Enter new idea";
                 IdeaInput.Visibility = Visibility.Hidden;
                 BackgroundBall.Visibility = Visibility.Hidden;
             }
             else if (e.Key == Key.Escape)
             {
                 canvasController.enableNonFocusedBallsButtonBall();
-                IdeaInput.Text = "";
+                Keyboard.ClearFocus();
+                IdeaInput.Text = "Enter new idea";
                 IdeaInput.Visibility = Visibility.Hidden;
                 BackgroundBall.Visibility = Visibility.Hidden;
             }
