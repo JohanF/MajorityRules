@@ -22,6 +22,9 @@ namespace SurfaceApplication1
 
         protected override void Ellipse_TapGestureEvent(object sender, RoutedEventArgs e)
         {
+
+            this.pulseTimer.Start();
+            this.Radius = this.Radius + 5;
             if (runHandler && Clicked == false)
             {
 

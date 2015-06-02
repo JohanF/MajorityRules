@@ -41,7 +41,7 @@ namespace SurfaceApplication1
             // Add handlers for window availability events
             AddWindowAvailabilityHandlers();
 
-            canvasController = new CanvasController(MainCanvas, (int)MainWindow.Width, (int)MainWindow.Height);
+            canvasController = new CanvasController(MainCanvas, (int)MainWindow.Width, (int)MainWindow.Height, DebugText);
 
             IdeaInput.Visibility = System.Windows.Visibility.Hidden;
             IdeaInput.KeyUp += new KeyEventHandler(IdeaInput_KeyUp);
@@ -72,6 +72,7 @@ namespace SurfaceApplication1
             }
             else if (e.Key == Key.Escape)
             {
+                canvasController.enableNonFocusedBallsButtonBall();
                 IdeaInput.Text = "";
                 IdeaInput.Visibility = Visibility.Hidden;
                 BackgroundBall.Visibility = Visibility.Hidden;

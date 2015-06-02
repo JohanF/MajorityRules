@@ -23,8 +23,10 @@ namespace SurfaceApplication1
         protected override void Ellipse_TapGestureEvent(object sender, RoutedEventArgs e)
         {
             if (runHandler && Clicked == false)
-            {
 
+            {
+                this.pulseTimer.Start();
+                this.Radius = this.Radius + 5;
                 CanvasCtrl.disableNonFocusedBalls(this);
                 Clicked = true;
                 Debug.WriteLine("Ball pressed2");

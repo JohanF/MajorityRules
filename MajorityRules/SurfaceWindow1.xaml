@@ -7,7 +7,7 @@
                  ResizeMode="NoResize"  
     Title="SurfaceApplication1" mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" d:DesignHeight="309" d:DesignWidth="662" SizeToContent="WidthAndHeight" Background="#FFEF0606" AutoSignalLoadComplete="False">
     <Grid>
-        <Canvas Name="MainCanvas" Background="White">
+        <Canvas Name="MainCanvas" Background="DarkSlateGray">
 
             <!-- 
         The ellipse that will be dragged around. 
@@ -28,6 +28,7 @@
                  Height="50"
                  FontSize="20" MaxHeight="100">
         </TextBox>
+        <TextBlock Visibility="Collapsed" Foreground="Black"  FontSize="20" Width="200" Name="DebugText" />
         <s:ScatterView Name="MainScatterView" />
     </Grid>
     
