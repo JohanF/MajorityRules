@@ -60,7 +60,7 @@ namespace SurfaceApplication1
                 Text = t,
             };
 
-            textBlock.Foreground = Brushes.Black;
+            textBlock.Foreground = Brushes.White;
 
             grid.Children.Add(rectangle);
             grid.Children.Add(textBlock);
