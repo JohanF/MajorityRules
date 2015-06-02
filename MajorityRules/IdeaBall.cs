@@ -113,7 +113,7 @@ namespace SurfaceApplication1
             timer.Interval = 2000;
 
             pulseTimer.Elapsed += new ElapsedEventHandler(Ellipse_ClickedFeedbackEvent);
-            pulseTimer.Interval = 500;
+            pulseTimer.Interval = 250;
 
             Ellipse.IsManipulationEnabled = true;
             this.Ellipse.RenderTransform = this.transformGroup;
