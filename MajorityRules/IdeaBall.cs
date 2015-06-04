@@ -206,6 +206,10 @@ namespace SurfaceApplication1
                 releasePoint = e.TouchDevice.GetTouchPoint(this.mainCanvas).Position;
                 double deltaTouchDownReleaseX = Math.Abs(releasePoint.X - enterTouchPoint.X);
                 double deltaTouchDownReleaseY = Math.Abs(releasePoint.Y - enterTouchPoint.Y);
+
+
+                if (this.affectedByGravity) this.Velocity = new Vector(deltaX * 3, deltaY * 3);
+
                 if (deltaTouchDownReleaseX < 5 && deltaTouchDownReleaseY < 5)
                 {
                     isPressingMovement = true;
@@ -213,7 +217,6 @@ namespace SurfaceApplication1
                 else
                 {
                     isPressingMovement = false;
-                    if (this.affectedByGravity) this.Velocity = new Vector(deltaX * 3, deltaY * 3);
                 }
 
                 timer.Stop();

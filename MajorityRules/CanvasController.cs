@@ -12,6 +12,7 @@ using System.Windows;
 using System.Windows.Shapes;
 using Microsoft.Surface.Presentation.Controls;
 using Microsoft.Surface.Presentation.Input;
+using System.Windows.Media.Imaging;
 
 
 
@@ -119,6 +120,11 @@ namespace SurfaceApplication1
             this.centerOfGravity = new Point();
             this.centerOfRotation = new Point();
             this.gravityEnabled = true;
+
+            ImageBrush ib = new ImageBrush();
+            ib.ImageSource = new BitmapImage(new Uri(@"Images\Background.jpg", UriKind.Relative));
+            _mainCanvas.Background = ib;
+
 
             centerOfGravity.X = width / 2;
             centerOfGravity.Y = height/2;
