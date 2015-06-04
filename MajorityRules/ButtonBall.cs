@@ -16,6 +16,8 @@ namespace SurfaceApplication1
         public ButtonBall(Vector Position, Vector Velocity, Canvas mainCanvas, int rad, Color c, CanvasController CC, String text) : base(Position, Velocity, mainCanvas, rad, c, CC, text)
         {
             Title.Text = "Add new Idea";
+            Title.FontSize = 20;
+            Title.FontWeight = FontWeights.UltraBold;
             Debug.WriteLine("Ball button created");
             this.CanvasCtrl = CC;
         }

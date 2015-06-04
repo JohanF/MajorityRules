@@ -16,7 +16,9 @@ namespace SurfaceApplication1
         public GravityBall(Vector Position, Vector Velocity, Canvas mainCanvas, int rad, Color c, CanvasController CC, String text)
             : base(Position, Velocity, mainCanvas, rad, c, CC, text)
         {
-            Title.Text = "G";
+            Title.Text = "Gravity";
+            Title.FontSize = 26;
+            Title.FontWeight = FontWeights.UltraBold;
             this.CanvasCtrl = CC;
         }
 
